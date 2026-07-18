@@ -1,20 +1,27 @@
 """
 公司官网 - Flask 主应用
-功能：公司介绍、证书查询、在线考试
+功能：公司介绍、证书查询、在线考试、证书照片上传 + OCR
 """
 import json
 import sqlite3
 import os
+import uuid
 import secrets
 from datetime import datetime
 from functools import wraps
 from flask import Flask, render_template, request, jsonify, session, redirect, url_for
 from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'company-website-secret-key-change-in-production')
 app.config['SESSION_COOKIE_HTTPONLY'] = True
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
+
+# 上传配置
+UPLOAD_FOLDER = os.path.join(os.path.dirname(__file__), 'static', 'uploads')
+ALLOWED_EXTENSIONS = {'jpg', 'jpeg', 'png'}
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 
 @app.context_processor
@@ -48,13 +55,30 @@ def login_required(f):
     return decorated_function
 
 
+def admin_required(f):
+    """要求管理员权限的装饰器"""
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'user_id' not in session:
+            return redirect(url_for('auth_login', next=request.path))
+        conn = get_db()
+        cursor = conn.cursor()
+        cursor.execute('SELECT is_admin FROM users WHERE id = ?', (session['user_id'],))
+        user = cursor.fetchone()
+        conn.close()
+        if not user or not user['is_admin']:
+            return '无权访问，需要管理员权限', 403
+        return f(*args, **kwargs)
+    return decorated_function
+
+
 def get_current_user():
     """获取当前登录用户信息"""
     if 'user_id' not in session:
         return None
     conn = get_db()
     cursor = conn.cursor()
-    cursor.execute('SELECT id, username, phone FROM users WHERE id = ?', (session['user_id'],))
+    cursor.execute('SELECT id, username, phone, is_admin FROM users WHERE id = ?', (session['user_id'],))
     user = cursor.fetchone()
     conn.close()
     return dict(user) if user else None
@@ -95,8 +119,9 @@ def certificate():
 
 
 @app.route('/exam')
+@login_required
 def exam():
-    """在线考试页面"""
+    """在线考试页面（需登录）"""
     return render_template('exam.html')
 
 
@@ -265,22 +290,22 @@ def course_detail(course_id):
     conn.close()
 
     user = get_current_user()
-    has_paid = False
+    has_access = False
     if user:
         conn = get_db()
         cursor = conn.cursor()
         cursor.execute(
-            "SELECT id FROM orders WHERE user_id = ? AND course_id = ? AND status = 'paid'",
-            (user['id'], course_id)
+            "SELECT id FROM user_permissions WHERE user_id = ? AND resource_type = 'course' AND resource_value = ?",
+            (user['id'], str(course_id))
         )
-        has_paid = cursor.fetchone() is not None
+        has_access = cursor.fetchone() is not None
         conn.close()
 
     return render_template('course-detail.html',
                            course=dict(course),
                            chapters=chapters,
                            user=user,
-                           has_paid=has_paid)
+                           has_access=has_access)
 
 
 @app.route('/courses/<int:course_id>/watch/<int:chapter_id>')
@@ -297,15 +322,15 @@ def course_watch(course_id, chapter_id):
         conn.close()
         return '课程不存在', 404
 
-    # 检查购买（免费章节可免检？不，整课购买制）
+    # 检查权限（替代原来的购买检查）
     user_id = session['user_id']
     cursor.execute(
-        "SELECT id FROM orders WHERE user_id = ? AND course_id = ? AND status = 'paid'",
-        (user_id, course_id)
+        "SELECT id FROM user_permissions WHERE user_id = ? AND resource_type = 'course' AND resource_value = ?",
+        (user_id, str(course_id))
     )
-    has_paid = cursor.fetchone() is not None
+    has_access = cursor.fetchone() is not None
 
-    if not has_paid:
+    if not has_access:
         conn.close()
         return redirect(url_for('course_detail', course_id=course_id))
 
@@ -532,22 +557,32 @@ def api_payment_callback():
 @app.route('/user/orders')
 @login_required
 def user_orders():
-    """我的订单"""
+    """个人中心：我的课程和考试权限"""
     conn = get_db()
     cursor = conn.cursor()
+
+    # 查询用户有权限的课程
+    cursor.execute('''
+        SELECT c.id, c.title, c.description,
+               (SELECT COUNT(*) FROM chapters WHERE course_id = c.id) as chapters_count
+        FROM user_permissions up
+        JOIN courses c ON up.resource_value = CAST(c.id AS TEXT) AND up.resource_type = 'course'
+        WHERE up.user_id = ?
+        ORDER BY up.created_at DESC
+    ''', (session['user_id'],))
+    courses = [dict(row) for row in cursor.fetchall()]
+
+    # 查询用户有权限的考试
     cursor.execute(
-        '''SELECT o.*, c.title as course_title
-           FROM orders o
-           LEFT JOIN courses c ON o.course_id = c.id
-           WHERE o.user_id = ?
-           ORDER BY o.created_at DESC''',
+        "SELECT resource_value FROM user_permissions WHERE user_id = ? AND resource_type = 'exam' ORDER BY created_at DESC",
         (session['user_id'],)
     )
-    orders = [dict(row) for row in cursor.fetchall()]
+    exams = [row['resource_value'] for row in cursor.fetchall()]
+
     conn.close()
 
     user = get_current_user()
-    return render_template('user-orders.html', orders=orders, user=user)
+    return render_template('user-orders.html', courses=courses, exams=exams, user=user)
 
 
 # ==========================================
@@ -581,9 +616,11 @@ def query_certificate():
                     'id': row['id'],
                     'cert_name': row['cert_name'],
                     'cert_number': row['cert_number'],
+                    'qualification_type': row['qualification_type'] or row['cert_name'],
                     'issue_date': row['issue_date'],
                     'expire_date': row['expire_date'] or '长期有效',
-                    'status': row['status']
+                    'status': row['status'],
+                    'photo_url': row['photo_path'] or None,
                 })
             return jsonify({
                 'success': True,
@@ -605,14 +642,90 @@ def query_certificate():
 # 考试系统 API
 # ==========================================
 
-@app.route('/api/exam/questions')
-def get_questions():
-    """获取随机 50 题，每题 2 分"""
+@app.route('/api/exam/types')
+def get_exam_types():
+    """获取所有考试类型及题目数量（含零题目类型），标记用户权限"""
     try:
         conn = get_db()
         cursor = conn.cursor()
-        # 从题库随机取 50 题
-        cursor.execute('SELECT * FROM questions ORDER BY RANDOM() LIMIT 50')
+        cursor.execute('''
+            SELECT et.category, et.pass_score, COUNT(q.id) as cnt
+            FROM exam_types et
+            LEFT JOIN questions q ON et.category = q.category
+            GROUP BY et.category
+            ORDER BY et.sort_order
+        ''')
+        rows = cursor.fetchall()
+
+        # 查询当前用户的考试权限
+        user = get_current_user()
+        user_exam_perms = set()
+        if user:
+            cursor.execute(
+                "SELECT resource_value FROM user_permissions WHERE user_id = ? AND resource_type = 'exam'",
+                (user['id'],)
+            )
+            user_exam_perms = {row['resource_value'] for row in cursor.fetchall()}
+        conn.close()
+
+        # 考试类型 → 图片文件名映射（按 sort_order 顺序）
+        exam_images = [
+            'exam_01_iso9001.png',    # ISO9001
+            'exam_02_iso14001.png',   # ISO14001
+            'exam_03_iso45001.png',   # ISO45001
+            'exam_04_iatf16949.jpg',  # IATF16949
+            'exam_05_vda63.png',      # VDA6.3
+            'exam_06_vda65.png',      # VDA6.5
+            'exam_07_iso13485.jpg',   # ISO13485
+            'exam_08_qc080000.png',   # QC080000
+            None,                      # ESG（缺图）
+            'exam_10_calibration.jpg', # 计量校准
+        ]
+        types = []
+        for i, row in enumerate(rows):
+            img = exam_images[i] if i < len(exam_images) else None
+            types.append({
+                'category': row['category'],
+                'count': row['cnt'],
+                'pass_score': row['pass_score'],
+                'image': f'/static/images/exams/{img}' if img else None,
+                'has_permission': row['category'] in user_exam_perms,
+            })
+
+        return jsonify({'success': True, 'types': types})
+
+    except Exception as e:
+        return jsonify({'success': False, 'message': f'获取考试类型失败：{str(e)}'})
+
+
+@app.route('/api/exam/questions')
+@login_required
+def get_questions():
+    """获取随机 50 题，每题 2 分，支持按考试类型筛选（需考试权限）"""
+    category = request.args.get('category', '').strip()
+
+    try:
+        conn = get_db()
+        cursor = conn.cursor()
+
+        # 检查考试权限
+        user = get_current_user()
+        if category:
+            cursor.execute(
+                "SELECT id FROM user_permissions WHERE user_id = ? AND resource_type = 'exam' AND resource_value = ?",
+                (user['id'], category)
+            )
+            if not cursor.fetchone():
+                conn.close()
+                return jsonify({'success': False, 'message': '您没有该考试类型的权限，请联系垚博企管开通'})
+
+        if category:
+            cursor.execute(
+                'SELECT * FROM questions WHERE category = ? ORDER BY RANDOM() LIMIT 50',
+                (category,)
+            )
+        else:
+            cursor.execute('SELECT * FROM questions ORDER BY RANDOM() LIMIT 50')
         rows = cursor.fetchall()
         conn.close()
 
@@ -638,10 +751,15 @@ def get_questions():
 
 
 @app.route('/api/exam/submit', methods=['POST'])
+@login_required
 def submit_exam():
-    """提交考试答案并自动评分"""
+    """提交考试答案并自动评分（需登录）"""
     data = request.get_json()
-    exam_taker = data.get('exam_taker', '匿名考生')
+    # 考生姓名：优先使用登录用户名
+    exam_taker = data.get('exam_taker', '').strip()
+    user = get_current_user()
+    if not exam_taker and user:
+        exam_taker = user.get('username', '匿名考生')
     answers = data.get('answers', {})
 
     if not answers:
@@ -683,9 +801,10 @@ def submit_exam():
 
         # 保存考试记录
         cursor.execute('''
-            INSERT INTO exam_records (exam_taker, score, total_questions, correct_count, answers, completed_at)
-            VALUES (?, ?, ?, ?, ?, ?)
+            INSERT INTO exam_records (user_id, exam_taker, score, total_questions, correct_count, answers, completed_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
         ''', (
+            user['id'] if user else None,
             exam_taker,
             total_score,
             total_questions,
@@ -713,6 +832,255 @@ def submit_exam():
 
 
 # ==========================================
+# 证书上传 + OCR 路由
+# ==========================================
+
+def allowed_file(filename):
+    """检查文件扩展名是否允许"""
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+
+@app.route('/admin/upload-cert')
+@admin_required
+def admin_upload_cert():
+    """证书上传管理页面"""
+    return render_template('admin-upload.html')
+
+
+@app.route('/api/admin/certificate/upload', methods=['POST'])
+@admin_required
+def api_upload_certificate():
+    """
+    证书上传 API
+    - 第一阶段：上传图片 → OCR 识别 → 返回提取结果（不保存）
+    - 第二阶段：确认后 → 存入数据库
+    """
+    # ========== 第二阶段：确认保存 ==========
+    if request.is_json:
+        data = request.get_json()
+        if data.get('confirmed'):
+            name = (data.get('name') or '').strip()
+            id_number = (data.get('id_number') or '').strip()
+            cert_number = (data.get('cert_number') or '').strip()
+            qualification_type = (data.get('qualification_type') or '').strip()
+            issue_date = (data.get('issue_date') or '').strip()
+            expire_date = (data.get('expire_date') or '').strip() or None
+            photo_url = (data.get('photo_url') or '').strip()
+
+            # 校验
+            if not all([name, id_number, cert_number, qualification_type, issue_date]):
+                return jsonify({'success': False, 'message': '请填写所有必填字段'})
+
+            # 生成证书名称（资质类型 + 课程）
+            cert_name = qualification_type
+
+            # 自动判断状态
+            status = '有效'
+            if expire_date:
+                try:
+                    exp_dt = datetime.strptime(expire_date, '%Y-%m-%d')
+                    if exp_dt < datetime.now():
+                        status = '过期'
+                except ValueError:
+                    pass
+
+            try:
+                conn = get_db()
+                cursor = conn.cursor()
+
+                # 检查证书编号是否已存在
+                cursor.execute('SELECT id FROM certificates WHERE cert_number = ?', (cert_number,))
+                if cursor.fetchone():
+                    conn.close()
+                    return jsonify({'success': False, 'message': f'证书编号 {cert_number} 已存在，请勿重复上传'})
+
+                cursor.execute('''
+                    INSERT INTO certificates (name, id_number, cert_name, cert_number,
+                                             qualification_type, issue_date, expire_date,
+                                             status, photo_path)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ''', (name, id_number, cert_name, cert_number,
+                      qualification_type, issue_date, expire_date,
+                      status, photo_url))
+                conn.commit()
+                conn.close()
+
+                return jsonify({'success': True, 'message': f'证书 {cert_number} 已成功入库！'})
+
+            except Exception as e:
+                return jsonify({'success': False, 'message': f'保存失败：{str(e)}'})
+
+    # ========== 第一阶段：上传图片 + OCR ==========
+    if 'photo' not in request.files:
+        return jsonify({'success': False, 'message': '请选择证书照片'})
+
+    file = request.files['photo']
+    if file.filename == '':
+        return jsonify({'success': False, 'message': '请选择证书照片'})
+
+    if not allowed_file(file.filename):
+        return jsonify({'success': False, 'message': '仅支持 JPG / PNG 格式'})
+
+    try:
+        # 保存上传文件
+        ext = file.filename.rsplit('.', 1)[1].lower()
+        filename = f"cert_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{uuid.uuid4().hex[:6]}.{ext}"
+        filepath = os.path.join(UPLOAD_FOLDER, filename)
+        file.save(filepath)
+
+        # 调用 OCR
+        from utils.ocr import extract_text, parse_certificate_info
+        raw_text = extract_text(filepath)
+        info = parse_certificate_info(raw_text)
+
+        # 照片的 URL 路径
+        photo_url = f'/static/uploads/{filename}'
+
+        return jsonify({
+            'success': True,
+            'photo_url': photo_url,
+            'raw_text': raw_text,
+            'ocr_result': {
+                'name': info.get('name', ''),
+                'id_number': info.get('id_number', ''),
+                'cert_number': info.get('cert_number', ''),
+                'qualification_type': info.get('qualification_type', ''),
+                'issue_date': info.get('issue_date', ''),
+                'expire_date': info.get('expire_date', ''),
+                'status': info.get('status', '有效'),
+            }
+        })
+
+    except ImportError as e:
+        return jsonify({'success': False, 'message': f'OCR 依赖未安装：{str(e)}'})
+    except Exception as e:
+        return jsonify({'success': False, 'message': f'上传失败：{str(e)}'})
+
+
+# ==========================================
+# 管理员 - 用户权限管理
+# ==========================================
+
+@app.route('/admin/users')
+@admin_required
+def admin_users():
+    """用户权限管理页面"""
+    return render_template('admin-users.html')
+
+
+@app.route('/api/admin/users/list')
+@admin_required
+def api_admin_users_list():
+    """获取所有用户及其权限"""
+    try:
+        conn = get_db()
+        cursor = conn.cursor()
+
+        cursor.execute('SELECT id, username, phone, is_admin, created_at FROM users ORDER BY created_at DESC')
+        users = [dict(row) for row in cursor.fetchall()]
+
+        # 获取每个用户的权限
+        for u in users:
+            cursor.execute(
+                "SELECT resource_type, resource_value FROM user_permissions WHERE user_id = ?",
+                (u['id'],)
+            )
+            perms = cursor.fetchall()
+            u['permissions'] = [{'type': p['resource_type'], 'value': p['resource_value']} for p in perms]
+
+        # 获取所有课程列表（供权限分配用）
+        cursor.execute("SELECT id, title FROM courses WHERE status = 'published' ORDER BY sort_order")
+        courses = [dict(row) for row in cursor.fetchall()]
+
+        # 获取所有考试类型
+        cursor.execute('SELECT category FROM exam_types ORDER BY sort_order')
+        exam_types = [row['category'] for row in cursor.fetchall()]
+
+        conn.close()
+
+        return jsonify({
+            'success': True,
+            'users': users,
+            'courses': courses,
+            'exam_types': exam_types,
+        })
+
+    except Exception as e:
+        return jsonify({'success': False, 'message': f'获取用户列表失败：{str(e)}'})
+
+
+@app.route('/api/admin/permissions/grant', methods=['POST'])
+@admin_required
+def api_admin_grant_permission():
+    """授予权限"""
+    data = request.get_json()
+    user_id = data.get('user_id')
+    resource_type = data.get('resource_type')
+    resource_value = data.get('resource_value')
+
+    if not all([user_id, resource_type, resource_value]):
+        return jsonify({'success': False, 'message': '参数不完整'})
+
+    if resource_type not in ('course', 'exam'):
+        return jsonify({'success': False, 'message': '无效的权限类型'})
+
+    try:
+        conn = get_db()
+        cursor = conn.cursor()
+        cursor.execute(
+            'INSERT OR IGNORE INTO user_permissions (user_id, resource_type, resource_value, granted_by) VALUES (?, ?, ?, ?)',
+            (user_id, resource_type, resource_value, session['user_id'])
+        )
+        conn.commit()
+        conn.close()
+        return jsonify({'success': True, 'message': '权限已授予'})
+    except Exception as e:
+        return jsonify({'success': False, 'message': f'授权失败：{str(e)}'})
+
+
+@app.route('/api/admin/permissions/revoke', methods=['POST'])
+@admin_required
+def api_admin_revoke_permission():
+    """撤销权限"""
+    data = request.get_json()
+    user_id = data.get('user_id')
+    resource_type = data.get('resource_type')
+    resource_value = data.get('resource_value')
+
+    if not all([user_id, resource_type, resource_value]):
+        return jsonify({'success': False, 'message': '参数不完整'})
+
+    try:
+        conn = get_db()
+        cursor = conn.cursor()
+        cursor.execute(
+            'DELETE FROM user_permissions WHERE user_id = ? AND resource_type = ? AND resource_value = ?',
+            (user_id, resource_type, resource_value)
+        )
+        conn.commit()
+        conn.close()
+        return jsonify({'success': True, 'message': '权限已撤销'})
+    except Exception as e:
+        return jsonify({'success': False, 'message': f'撤权失败：{str(e)}'})
+
+
+# ==========================================
+# SEO 路由：robots.txt 和 sitemap.xml
+# ==========================================
+
+@app.route('/robots.txt')
+def robots_txt():
+    """返回 robots.txt 引导搜索引擎爬取"""
+    return app.send_static_file('robots.txt')
+
+
+@app.route('/sitemap.xml')
+def sitemap_xml():
+    """返回 sitemap.xml 站点地图"""
+    return app.send_static_file('sitemap.xml')
+
+
+# ==========================================
 # 启动应用
 # ==========================================
 
@@ -724,4 +1092,4 @@ if __name__ == '__main__':
         print("[OK] 垚博企管官网启动...")
         print("   - 访问地址: http://127.0.0.1:5000")
         print("   - 按 Ctrl+C 停止服务器")
-        app.run(debug=True, host='127.0.0.1', port=5000)
+        app.run(debug=True, host='0.0.0.0', port=5000)

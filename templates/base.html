@@ -4,7 +4,48 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}垚博企管 - 东莞市垚博企业管理咨询有限公司{% endblock %}</title>
+    <meta name="description" content="{% block description %}垚博企管（东莞市垚博企业管理咨询有限公司）专注中小微制造型企业降本增效、流程再造。提供管理咨询、体系认证、企业培训、证书查询、在线考试等服务。从心出发，保姆式落地辅导，被业界誉为中小微企业的变革引领者。{% endblock %}">
+    <meta name="keywords" content="{% block keywords %}垚博企管,东莞市垚博企业管理咨询有限公司,企业管理咨询,体系认证,企业培训,降本增效,流程再造,ISO认证,管理咨询公司,东莞咨询公司,证书查询,在线考试{% endblock %}">
+    <meta name="author" content="东莞市垚博企业管理咨询有限公司">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://ybqg.work{{ request.path }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <!-- 百度自动推送 -->
+    <script>
+    (function(){
+        var bp = document.createElement('script');
+        var curProtocol = window.location.protocol.split(':')[0];
+        if (curProtocol === 'https') {
+            bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+        } else {
+            bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+        }
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(bp, s);
+    })();
+    </script>
+    <!-- 结构化数据：帮助百度理解企业信息 -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "LocalBusiness",
+        "name": "东莞市垚博企业管理咨询有限公司",
+        "alternateName": "垚博企管",
+        "description": "专注中小微制造型企业降本增效、流程再造，提供管理咨询、体系认证、企业培训服务",
+        "url": "https://ybqg.work",
+        "telephone": ["+86-769-81707950", "+86-18025926208"],
+        "email": "stone_laoluo@163.com",
+        "address": {
+            "@type": "PostalAddress",
+            "addressLocality": "东莞市",
+            "addressRegion": "广东省",
+            "streetAddress": "石排镇工业大道松泰大厦20号306"
+        },
+        "sameAs": [
+            "https://ybqg.work"
+        ]
+    }
+    </script>
     {% block extra_head %}{% endblock %}
 </head>
 <body>
@@ -36,6 +77,15 @@
                 <li><a href="/exam" class="nav-link nav-cta {% if request.path == '/exam' %}active{% endif %}">在线考试</a></li>
                 {% if user %}
                 <li><a href="/user/orders" class="nav-link {% if request.path == '/user/orders' %}active{% endif %}">个人中心</a></li>
+                {% if user.is_admin %}
+                <li class="nav-dropdown">
+                    <a href="#" class="nav-link nav-cta" style="background:#f39c12;color:#fff;">⚙ 管理 <span class="nav-arrow">▾</span></a>
+                    <ul class="nav-submenu">
+                        <li><a href="/admin/users">👥 用户管理</a></li>
+                        <li><a href="/admin/upload-cert">📤 证书录入</a></li>
+                    </ul>
+                </li>
+                {% endif %}
                 {% else %}
                 <li><a href="/auth/login" class="nav-link {% if request.path == '/auth/login' %}active{% endif %}">登录</a></li>
                 {% endif %}
@@ -62,7 +112,29 @@
         </div>
     </footer>
 
+    <!-- ===== 联系垚博企管 二维码弹窗（全局共用） ===== -->
+    <div id="contact-modal" class="modal-overlay" style="display:none;" onclick="if(event.target===this)closeContactModal()">
+        <div class="modal-card" style="text-align:center;max-width:360px;">
+            <button onclick="closeContactModal()" style="position:absolute;top:12px;right:16px;background:none;border:none;font-size:24px;cursor:pointer;color:#999;">&times;</button>
+            <h3 style="margin-bottom:4px;">联系垚博企管开通权限</h3>
+            <p style="color:var(--text-secondary);font-size:13px;margin-bottom:16px;">扫码添加微信，备注您的姓名和需求</p>
+            <img src="{{ url_for('static', filename='images/qrcode_wechat.jpg') }}" alt="垚博企管微信二维码" style="width:200px;height:200px;border-radius:8px;border:1px solid #eee;" onerror="this.outerHTML='<div style=\'width:200px;height:200px;margin:0 auto;border-radius:8px;background:#f5f5f5;display:flex;align-items:center;justify-content:center;color:#999;font-size:13px;\'>请上传二维码图片<br>static/images/qrcode_wechat.jpg</div>'">
+            <div style="margin-top:16px;padding-top:16px;border-top:1px solid #eee;color:var(--text-secondary);font-size:13px;line-height:1.8;">
+                <p>📞 电话：18025926208 / 18122825922</p>
+                <p>📧 邮箱：stone_laoluo@163.com</p>
+            </div>
+        </div>
+    </div>
+
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script>
+    function showContactQr() {
+        document.getElementById('contact-modal').style.display = 'flex';
+    }
+    function closeContactModal() {
+        document.getElementById('contact-modal').style.display = 'none';
+    }
+    </script>
     {% block extra_scripts %}{% endblock %}
 </body>
 </html>

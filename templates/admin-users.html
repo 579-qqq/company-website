@@ -1,0 +1,164 @@
+{% extends "base.html" %}
+{% block title %}用户管理 - 垚博企管{% endblock %}
+
+{% block content %}
+<section class="page-hero">
+    <div class="container page-hero-content">
+        <h1>👥 用户权限管理</h1>
+        <p>管理用户账号，分配课程和考试权限</p>
+    </div>
+</section>
+
+<section class="section" style="padding-top: 0;">
+    <div class="container">
+        <!-- 加载状态 -->
+        <div id="loading" class="loading" style="display:block;">
+            <div class="spinner"></div>
+            <p>加载中...</p>
+        </div>
+
+        <!-- 用户列表 -->
+        <div id="userList" style="display:none;"></div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+let allUsers = [];
+let allCourses = [];
+let allExamTypes = [];
+
+window.addEventListener('DOMContentLoaded', loadData);
+
+function loadData() {
+    fetch('/api/admin/users/list')
+        .then(r => r.json())
+        .then(data => {
+            if (!data.success) { showError(data.message); return; }
+            allUsers = data.users;
+            allCourses = data.courses;
+            allExamTypes = data.exam_types;
+            renderPage();
+        })
+        .catch(() => showError('加载失败，请刷新重试'));
+}
+
+function showError(msg) {
+    document.getElementById('loading').innerHTML =
+        '<p style="color:#e74c3c;text-align:center;">' + msg + '</p>';
+}
+
+function renderPage() {
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('userList').style.display = 'block';
+
+    let html = '';
+
+    // 每位用户一张卡片
+    allUsers.forEach(u => {
+        const coursePerms = u.permissions.filter(p => p.type === 'course').map(p => p.value);
+        const examPerms = u.permissions.filter(p => p.type === 'exam').map(p => p.value);
+
+        html += '<div class="query-wrapper" style="margin-bottom:20px;">';
+        html += '<div class="cert-card" style="flex-direction:column;align-items:stretch;padding:16px;">';
+
+        // 用户基本信息行
+        html += '<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">';
+        html += '<div>';
+        html += '<strong style="font-size:16px;">' + u.username + '</strong>';
+        if (u.is_admin) html += ' <span style="background:#f39c12;color:#fff;padding:1px 6px;border-radius:3px;font-size:11px;">管理员</span>';
+        html += ' <span style="color:#999;font-size:13px;">' + u.phone + '</span>';
+        html += '</div>';
+        html += '<span style="color:#aaa;font-size:12px;">注册：' + (u.created_at || '未知').slice(0,10) + '</span>';
+        html += '</div>';
+
+        // 课程权限
+        html += '<div style="margin-top:12px;">';
+        html += '<div style="font-size:13px;color:#888;margin-bottom:4px;">📚 课程权限</div>';
+        html += '<div style="display:flex;flex-wrap:wrap;gap:6px;">';
+        allCourses.forEach(c => {
+            const cid = String(c.id);
+            const has = coursePerms.includes(cid);
+            html += '<label class="perm-chip ' + (has ? 'perm-on' : 'perm-off') + '" style="cursor:pointer;">';
+            html += '<input type="checkbox" ' + (has ? 'checked' : '') +
+                    ' onchange="togglePerm(' + u.id + ',\'course\',\'' + cid + '\',this)" style="display:none;">';
+            html += (has ? '✅ ' : '⬜ ') + c.title;
+            html += '</label>';
+        });
+        if (allCourses.length === 0) html += '<span style="color:#ccc;font-size:12px;">暂无课程</span>';
+        html += '</div></div>';
+
+        // 考试权限
+        html += '<div style="margin-top:10px;">';
+        html += '<div style="font-size:13px;color:#888;margin-bottom:4px;">📝 考试权限</div>';
+        html += '<div style="display:flex;flex-wrap:wrap;gap:6px;">';
+        allExamTypes.forEach(et => {
+            const has = examPerms.includes(et);
+            html += '<label class="perm-chip ' + (has ? 'perm-on' : 'perm-off') + '" style="cursor:pointer;">';
+            html += '<input type="checkbox" ' + (has ? 'checked' : '') +
+                    ' onchange="togglePerm(' + u.id + ',\'exam\',\'' + et + '\',this)" style="display:none;">';
+            html += (has ? '✅ ' : '⬜ ') + et;
+            html += '</label>';
+        });
+        if (allExamTypes.length === 0) html += '<span style="color:#ccc;font-size:12px;">暂无考试类型</span>';
+        html += '</div></div>';
+
+        html += '</div></div>';
+    });
+
+    if (allUsers.length === 0) {
+        html = '<div style="text-align:center;padding:40px;color:#999;">暂无用户</div>';
+    }
+
+    document.getElementById('userList').innerHTML = html;
+}
+
+function togglePerm(userId, type, value, checkbox) {
+    const has = checkbox.checked;
+    const url = has ? '/api/admin/permissions/grant' : '/api/admin/permissions/revoke';
+    const label = checkbox.parentElement;
+
+    // 乐观更新
+    label.classList.toggle('perm-on', has);
+    label.classList.toggle('perm-off', !has);
+    const oldText = label.innerHTML;
+    label.innerHTML = (has ? '✅ ' : '⬜ ') + label.textContent.replace(/^[✅⬜] /, '');
+
+    fetch(url, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({user_id: userId, resource_type: type, resource_value: value})
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (!data.success) {
+            // 回滚
+            checkbox.checked = !has;
+            label.classList.toggle('perm-on', !has);
+            label.classList.toggle('perm-off', has);
+            label.innerHTML = oldText;
+            alert(data.message);
+        }
+    })
+    .catch(() => {
+        checkbox.checked = !has;
+        label.classList.toggle('perm-on', !has);
+        label.classList.toggle('perm-off', has);
+        label.innerHTML = oldText;
+        alert('网络错误');
+    });
+}
+</script>
+
+<style>
+.perm-chip {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 4px 10px; border-radius: 16px; font-size: 13px;
+    border: 1px solid #ddd; user-select: none; transition: all 0.2s;
+}
+.perm-on { background: #e8f5e9; border-color: #4caf50; color: #2e7d32; }
+.perm-off { background: #fafafa; color: #999; }
+.perm-chip:hover { border-color: #999; }
+</style>
+{% endblock %}

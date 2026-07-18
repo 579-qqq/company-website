@@ -1,0 +1,256 @@
+{% extends "base.html" %}
+{% block title %}垚博企管 - 证书上传管理{% endblock %}
+
+{% block content %}
+<!-- ===== 页面顶部 ===== -->
+<section class="page-hero">
+    <div class="container page-hero-content">
+        <h1>证书上传管理</h1>
+        <p>上传证书照片，OCR 自动提取信息后确认入库</p>
+    </div>
+</section>
+
+<section class="section" style="padding-top: 0;">
+    <div class="container">
+        <!-- ===== 上传表单 ===== -->
+        <div class="query-wrapper" id="upload-form-area">
+            <div class="query-form">
+                <h3 style="margin-bottom: 1rem;">📤 上传证书照片</h3>
+                <div class="form-group">
+                    <label for="photo">选择证书图片（支持 JPG / PNG）</label>
+                    <input type="file" id="photo" class="form-input" accept="image/jpeg,image/png,image/jpg" style="padding: 8px;">
+                </div>
+                <!-- 图片预览 -->
+                <div id="preview-area" style="display:none; text-align:center; margin-bottom:1rem;">
+                    <img id="preview-img" src="" style="max-width:100%; max-height:300px; border-radius:8px; border:1px solid #ddd;">
+                </div>
+                <button id="btn-upload" class="btn btn-primary btn-full" onclick="uploadCertificate()">
+                    上传并识别
+                </button>
+            </div>
+        </div>
+
+        <!-- 加载动画 -->
+        <div id="loading" class="loading" style="display:none;">
+            <div class="spinner"></div>
+            <p>正在 OCR 识别中，请稍候...</p>
+        </div>
+
+        <!-- ===== OCR 结果 → 确认表单 ===== -->
+        <div id="ocr-result" class="query-result-area" style="display:none;"></div>
+
+        <!-- 使用说明 -->
+        <div class="tips">
+            <h4>使用说明</h4>
+            <ul>
+                <li>证书照片请确保 <strong>文字清晰、正面拍摄、光线均匀</strong></li>
+                <li>OCR 自动识别姓名、身份证号、证书编号、资质类型和日期</li>
+                <li>识别结果需<strong>人工核对</strong>后再确认入库</li>
+                <li>如识别不准确，可手动修正后再确认</li>
+            </ul>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+// 图片预览
+document.getElementById('photo').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(ev) {
+        document.getElementById('preview-img').src = ev.target.result;
+        document.getElementById('preview-area').style.display = 'block';
+    };
+    reader.readAsDataURL(file);
+});
+
+function uploadCertificate() {
+    const fileInput = document.getElementById('photo');
+    const file = fileInput.files[0];
+
+    if (!file) {
+        showMessage('error', '请先选择证书照片');
+        return;
+    }
+
+    const btn = document.getElementById('btn-upload');
+    const loading = document.getElementById('loading');
+    const ocrResult = document.getElementById('ocr-result');
+
+    btn.disabled = true;
+    btn.textContent = '识别中...';
+    loading.style.display = 'block';
+    ocrResult.style.display = 'none';
+
+    const formData = new FormData();
+    formData.append('photo', file);
+
+    fetch('/api/admin/certificate/upload', {
+        method: 'POST',
+        body: formData
+    })
+    .then(res => res.json())
+    .then(data => {
+        loading.style.display = 'none';
+        btn.disabled = false;
+        btn.textContent = '上传并识别';
+
+        if (data.success) {
+            renderOcrResult(data);
+        } else {
+            showMessage('error', data.message || '识别失败');
+        }
+    })
+    .catch(() => {
+        loading.style.display = 'none';
+        btn.disabled = false;
+        btn.textContent = '上传并识别';
+        showMessage('error', '网络错误，请稍后重试');
+    });
+}
+
+function renderOcrResult(data) {
+    const info = data.ocr_result || {};
+    const photoUrl = data.photo_url || '';
+
+    const rawText = data.raw_text || '';
+
+    let html = `
+        <div class="result-card">
+            <div class="result-header result-success">
+                <span class="result-icon">🔍</span>
+                <div>
+                    <h3>识别结果 — 请核对并修正</h3>
+                    <p>下方为 OCR 自动提取，如有错误请手动修改</p>
+                </div>
+            </div>
+            <div class="result-body">
+                <!-- OCR 原始文本（可折叠） -->
+                <details style="margin-bottom:1rem; background:#f8f9fa; border-radius:8px; padding:12px;">
+                    <summary style="cursor:pointer; font-weight:600; color:#555;">📝 OCR 原始文本（点击展开核对）</summary>
+                    <pre style="white-space:pre-wrap; font-size:12px; color:#666; margin-top:8px; max-height:200px; overflow-y:auto;">${escapeHtml(rawText)}</pre>
+                </details>
+
+                <div class="form-group">
+                    <label for="ocr-name">姓名</label>
+                    <input type="text" id="ocr-name" class="form-input" value="${escapeHtml(info.name || '')}" placeholder="请填入姓名">
+                </div>
+                <div class="form-group">
+                    <label for="ocr-id_number">身份证号码</label>
+                    <input type="text" id="ocr-id_number" class="form-input" value="${info.id_number || ''}" placeholder="请填入18位身份证号" maxlength="18">
+                </div>
+                <div class="form-group">
+                    <label for="ocr-cert_number">证书编号</label>
+                    <input type="text" id="ocr-cert_number" class="form-input" value="${escapeHtml(info.cert_number || '')}" placeholder="请填入证书编号">
+                </div>
+                <div class="form-group">
+                    <label for="ocr-qualification_type">资质类型 / 培训课程</label>
+                    <input type="text" id="ocr-qualification_type" class="form-input" value="${escapeHtml(info.qualification_type || '')}" placeholder="如：ISO9001 质量管理体系内部审核员">
+                </div>
+                <div class="form-group" style="display:flex; gap:1rem;">
+                    <div style="flex:1;">
+                        <label for="ocr-issue_date">发证日期</label>
+                        <input type="text" id="ocr-issue_date" class="form-input" value="${info.issue_date || ''}" placeholder="YYYY-MM-DD">
+                    </div>
+                    <div style="flex:1;">
+                        <label for="ocr-expire_date">有效期至</label>
+                        <input type="text" id="ocr-expire_date" class="form-input" value="${info.expire_date || ''}" placeholder="YYYY-MM-DD（留空=长期有效）">
+                    </div>
+                </div>
+                <div class="form-group" style="display:flex; gap:1rem; align-items:center;">
+                    <div style="flex:1;">
+                        <label for="ocr-status">证书状态</label>
+                        <select id="ocr-status" class="form-input">
+                            <option value="有效" ${(info.status || '有效') === '有效' ? 'selected' : ''}>✓ 有效</option>
+                            <option value="过期" ${info.status === '过期' ? 'selected' : ''}>✗ 已过期</option>
+                            <option value="吊销" ${info.status === '吊销' ? 'selected' : ''}>✗ 已吊销</option>
+                        </select>
+                    </div>
+                    <div style="flex:1; padding-top: 1.5rem;">
+                        <span style="font-size:12px; color:#888;">自动判断: ${info.status || '有效'}</span>
+                    </div>
+                </div>
+                <input type="hidden" id="ocr-photo-url" value="${photoUrl}">
+                <div style="margin-top: 1rem; display: flex; gap: 1rem;">
+                    <button class="btn btn-primary btn-full" onclick="confirmSave()" style="flex:1;">✅ 确认入库</button>
+                    <button class="btn btn-secondary btn-full" onclick="resetUpload()" style="flex:1;">🔄 重新上传</button>
+                </div>
+            </div>
+        </div>
+    `;
+    document.getElementById('ocr-result').innerHTML = html;
+    document.getElementById('ocr-result').style.display = 'block';
+    document.getElementById('ocr-result').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function confirmSave() {
+    const data = {
+        name: document.getElementById('ocr-name').value.trim(),
+        id_number: document.getElementById('ocr-id_number').value.trim(),
+        cert_number: document.getElementById('ocr-cert_number').value.trim(),
+        qualification_type: document.getElementById('ocr-qualification_type').value.trim(),
+        issue_date: document.getElementById('ocr-issue_date').value.trim(),
+        expire_date: document.getElementById('ocr-expire_date').value.trim(),
+        photo_url: document.getElementById('ocr-photo-url').value,
+        confirmed: true
+    };
+
+    // 基本校验
+    if (!data.name) { alert('请输入姓名'); return; }
+    if (!data.id_number || data.id_number.length < 15) { alert('请输入正确的身份证号'); return; }
+    if (!data.cert_number) { alert('请输入证书编号'); return; }
+    if (!data.qualification_type) { alert('请输入资质类型/培训课程'); return; }
+    if (!data.issue_date) { alert('请输入发证日期'); return; }
+
+    fetch('/api/admin/certificate/upload', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            alert('✅ 证书已成功入库！');
+            resetUpload();
+        } else {
+            alert('❌ 保存失败: ' + (data.message || '未知错误'));
+        }
+    })
+    .catch(() => alert('网络错误，请稍后再试'));
+}
+
+function resetUpload() {
+    document.getElementById('photo').value = '';
+    document.getElementById('preview-area').style.display = 'none';
+    document.getElementById('ocr-result').style.display = 'none';
+    document.getElementById('upload-form-area').scrollIntoView({ behavior: 'smooth' });
+}
+
+function showMessage(type, msg) {
+    const result = document.getElementById('ocr-result');
+    const icon = type === 'error' ? '❌' : '⚠️';
+    const cls = type === 'error' ? 'result-error' : 'result-success';
+    result.innerHTML = `
+        <div class="result-card">
+            <div class="result-header ${cls}">
+                <span class="result-icon">${icon}</span>
+                <div>
+                    <h3>${type === 'error' ? '上传失败' : '提示'}</h3>
+                    <p>${msg}</p>
+                </div>
+            </div>
+        </div>
+    `;
+    result.style.display = 'block';
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+</script>
+{% endblock %}

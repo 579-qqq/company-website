@@ -1,10 +1,10 @@
-﻿/**
- * 杳氬崥浼佺瀹樼綉 - 涓昏剼鏈?
+/**
+ * 垚博企管官网 - 主脚本
  */
 document.addEventListener('DOMContentLoaded', function() {
 
     // ==========================================
-    // 绉诲姩绔彍鍗曞垏鎹?
+    // 移动端菜单切换
     // ==========================================
     var mobileToggle = document.querySelector('.mobile-menu-toggle');
     if (mobileToggle) {
@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // ==========================================
-    // 骞虫粦婊氬姩鍒伴敋鐐?
+    // 平滑滚动到锚点
     // ==========================================
     document.querySelectorAll('a[href*="#"]').forEach(function(link) {
         link.addEventListener('click', function(e) {
@@ -52,7 +52,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // ==========================================
-    // 鏈嶅姟鍗＄墖灞曞紑/鏀惰捣
+    // 服务卡片展开/收起
     // ==========================================
     document.querySelectorAll('.service-card-toggle').forEach(function(card) {
         card.addEventListener('click', function() {
@@ -75,7 +75,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // ==========================================
-    // 椤甸潰鍔犺浇鏃舵鏌?hash 骞舵粴鍔ㄥ埌瀵瑰簲浣嶇疆
+    // 页面加载时检查 hash 并滚动到对应位置
     // ==========================================
     if (window.location.hash) {
         var targetId = window.location.hash.substring(1);

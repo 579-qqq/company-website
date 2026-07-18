@@ -6,43 +6,50 @@
 <section class="page-hero">
     <div class="container page-hero-content">
         <h1>在线考试</h1>
-        <p>完成以下题目，提交后将自动评分并显示详细结果</p>
+        <p id="exam-subtitle">选择考试类型，完成答题后自动评分</p>
     </div>
 </section>
 
-<!-- ===== 考试区域 ===== -->
 <section class="section" style="padding-top: 0;">
     <div class="container">
         <div class="exam-wrapper">
 
-            <!-- 考试信息栏 -->
-            <div class="exam-bar">
-                <div class="exam-bar-item">
-                    <label>考生姓名</label>
-                    <input type="text" id="exam_taker" class="form-input" placeholder="请输入您的姓名" maxlength="20">
+            <!-- ===== 视图1: 考试类型选择 ===== -->
+            <div id="examTypeSelector">
+                <div class="section-header" style="margin-bottom: 1.5rem;">
+                    <h3>选择考试类型 [调试: 页面已加载]</h3>
+                    <p id="type-loading" style="color:red;font-weight:bold;">加载中...</p>
                 </div>
-                <div class="exam-stats" id="examStats" style="display:none;">
-                    <span>抽 <strong id="totalCount">0</strong> 题 · 每题 2 分 · 满分 100 · <strong style="color:#c62828;">70 分合格</strong></span>
-                    <br><small>已答 <strong id="answeredCount">0</strong> 题</small>
-                </div>
-                <div class="exam-bar-item" style="flex: 0 0 auto; min-width: auto;">
-                    <button id="btn-start" class="btn btn-primary" onclick="loadQuestions()">
-                        开始考试
-                    </button>
+                <div class="exam-type-grid" id="examTypeGrid" style="min-height:100px;border:2px dashed #ccc;">
+                    <p style="padding:20px;color:#999;">如果看到这行字，说明JS未执行</p>
                 </div>
             </div>
 
-            <!-- 加载动画 -->
-            <div id="examLoading" class="loading" style="display:none;">
-                <div class="spinner"></div>
-                <p>正在加载试题...</p>
-            </div>
-
-            <!-- 考试主体 -->
+            <!-- ===== 视图2: 考试答题区 ===== -->
             <div id="examArea" style="display:none;">
+                <!-- 返回按钮 -->
+                <button class="btn btn-outline btn-sm" onclick="backToTypes()" style="margin-bottom:1rem;">← 返回选择</button>
+
+                <!-- 考试信息栏 -->
+                <div class="exam-bar">
+                    <div>
+                        <span id="currentExamType" style="font-weight:700; font-size:16px;"></span>
+                        <span style="color:#888; margin-left:8px; font-size:13px;" id="examMeta"></span>
+                    </div>
+                    <div class="exam-bar-item">
+                        <label>考生姓名</label>
+                        <input type="text" id="exam_taker" class="form-input" placeholder="请输入您的姓名" maxlength="20" value="{{ user.username if user else '' }}">
+                    </div>
+                </div>
+
+                <!-- 加载 -->
+                <div id="examLoading" class="loading" style="display:none;">
+                    <div class="spinner"></div>
+                    <p>正在加载试题...</p>
+                </div>
 
                 <!-- 进度条 -->
-                <div class="exam-progress">
+                <div class="exam-progress" id="examProgress" style="display:none;">
                     <div class="progress-header">
                         <span>答题进度</span>
                         <span id="progressPercent">0%</span>
@@ -50,20 +57,19 @@
                     <div class="progress-bar">
                         <div class="progress-fill" id="progressFill"></div>
                     </div>
+                    <small style="color:#888;">已答 <strong id="answeredCount">0</strong> / <strong id="totalCount">0</strong> 题</small>
                 </div>
 
                 <!-- 题目列表 -->
                 <div id="questionList"></div>
 
                 <!-- 提交 -->
-                <div class="exam-footer" id="examActions">
-                    <button class="btn btn-primary" onclick="submitExam()" style="min-width: 200px;">
-                        提交答卷
-                    </button>
+                <div class="exam-footer" id="examActions" style="display:none;">
+                    <button class="btn btn-primary" onclick="submitExam()" style="min-width: 200px;">提交答卷</button>
                 </div>
             </div>
 
-            <!-- 成绩结果 -->
+            <!-- ===== 视图3: 成绩结果 ===== -->
             <div id="examResult" style="display:none;"></div>
 
         </div>
@@ -75,85 +81,149 @@
 <script>
 let questions = [];
 let userAnswers = {};
+let currentExamType = '';
 
-function loadQuestions() {
-    const name = document.getElementById('exam_taker').value.trim();
-    if (!name) {
-        alert('请先输入您的姓名');
-        document.getElementById('exam_taker').focus();
-        return;
-    }
+// ========== 页面初始化 ==========
+window.addEventListener('DOMContentLoaded', loadExamTypes);
+
+function loadExamTypes() {
+    document.getElementById('type-loading').textContent = '加载中...';
+    fetch('/api/exam/types')
+        .then(res => {
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            return res.json();
+        })
+        .then(data => {
+            if (!data.success) throw new Error(data.message || '未知错误');
+            if (!data.types.length) {
+                document.getElementById('type-loading').textContent = '暂无可用考试类型';
+                return;
+            }
+            document.getElementById('type-loading').style.display = 'none';
+            renderTypeCards(data.types);
+        })
+        .catch(err => {
+            document.getElementById('type-loading').textContent = '加载失败: ' + err.message + '，请刷新重试';
+            console.error('loadExamTypes error:', err);
+        });
+}
+
+function renderTypeCards(types) {
+    const grid = document.getElementById('examTypeGrid');
+    let html = '';
+    types.forEach((t, i) => {
+        const noQuestions = t.count === 0;
+        const noPerm = !t.has_permission;
+        const disabled = noQuestions || noPerm;
+        const imgTag = t.image
+            ? `<img src="${t.image}" alt="${escapeHtml(t.category)}" class="type-img">`
+            : `<div class="type-img type-img-placeholder">暂无图片</div>`;
+        let hint = '';
+        if (noQuestions) hint = '暂无题目';
+        else if (noPerm) hint = '🔒 联系垚博企管开通权限';
+        else hint = '进入考试 →';
+        let clickAction = '';
+        if (!noQuestions && !noPerm) clickAction = `startExam('${escapeJs(t.category)}')`;
+        else if (noPerm) clickAction = 'showContactQr()';
+        html += `
+            <div class="exam-type-card ${disabled ? 'disabled' : ''}"
+                 onclick="${clickAction}">
+                ${imgTag}
+                <div class="type-info">
+                    <h4>${t.category}</h4>
+                    <div class="type-meta">${t.count} 道题目 · ${t.pass_score} 分及格</div>
+                </div>
+                <div class="type-action">${hint}</div>
+            </div>
+        `;
+    });
+    grid.innerHTML = html;
+}
+
+// ========== 开始考试 ==========
+function startExam(category) {
+    currentExamType = category;
+    document.getElementById('examTypeSelector').style.display = 'none';
+    document.getElementById('examArea').style.display = 'block';
+    document.getElementById('examResult').style.display = 'none';
+    document.getElementById('currentExamType').textContent = category;
+    document.getElementById('exam-subtitle').textContent = category;
 
     document.getElementById('examLoading').style.display = 'block';
-    document.getElementById('examArea').style.display = 'none';
-    document.getElementById('examResult').style.display = 'none';
-    const btn = document.getElementById('btn-start');
-    btn.disabled = true;
-    btn.textContent = '加载中...';
+    document.getElementById('questionList').innerHTML = '';
+    document.getElementById('examProgress').style.display = 'none';
+    document.getElementById('examActions').style.display = 'none';
 
-    fetch('/api/exam/questions')
+    fetch(`/api/exam/questions?category=${encodeURIComponent(category)}`)
         .then(res => res.json())
         .then(data => {
             document.getElementById('examLoading').style.display = 'none';
-            btn.disabled = false;
-
             if (data.success && data.questions.length > 0) {
                 questions = data.questions;
                 userAnswers = {};
-                btn.textContent = '重新考试';
-                renderQuestions();
-                document.getElementById('examArea').style.display = 'block';
-                document.getElementById('examStats').style.display = 'block';
+                document.getElementById('examMeta').textContent = `共 ${questions.length} 题 · 每题2分 · 满分100`;
                 document.getElementById('totalCount').textContent = questions.length;
+                renderQuestions();
+                document.getElementById('examProgress').style.display = 'block';
+                document.getElementById('examActions').style.display = 'block';
                 updateProgress();
                 document.getElementById('questionList').scrollIntoView({ behavior: 'smooth' });
             } else {
-                btn.textContent = '开始考试';
-                alert('暂无可用试题，请联系管理员');
+                alert('该类型暂无可用试题');
+                backToTypes();
             }
         })
         .catch(() => {
             document.getElementById('examLoading').style.display = 'none';
-            btn.disabled = false;
-            btn.textContent = '开始考试';
-            alert('加载试题失败，请检查网络连接');
+            alert('加载试题失败');
+            backToTypes();
         });
 }
 
+// ========== 返回选择 ==========
+function backToTypes() {
+    questions = [];
+    userAnswers = {};
+    currentExamType = '';
+    document.getElementById('examTypeSelector').style.display = 'block';
+    document.getElementById('examArea').style.display = 'none';
+    document.getElementById('examResult').style.display = 'none';
+    document.getElementById('exam-subtitle').textContent = '选择考试类型，完成答题后自动评分';
+    document.getElementById('exam_taker').value = '';
+}
+
+// ========== 渲染题目 ==========
 function renderQuestions() {
     const container = document.getElementById('questionList');
     let html = '';
     questions.forEach((q, idx) => {
-        let categoryCls = 'tag-default';
+        let tagCls = 'tag-basic';
         const cat = q.category || '';
-        if (cat.includes('基础知识') || cat.includes('基础')) categoryCls = 'tag-basic';
-        else if (cat.includes('专业')) categoryCls = 'tag-professional';
-        else if (cat.includes('ISO')) categoryCls = 'tag-iso';
-        // 缩短分类显示名
-        let catDisplay = cat;
-        if (cat === 'ISO9001质量管理体系') catDisplay = 'ISO9001';
+        if (cat.includes('ISO9001')) tagCls = 'tag-iso';
+        else if (cat.includes('ISO14001')) tagCls = 'tag-env';
+        else if (cat.includes('ISO45001')) tagCls = 'tag-safety';
+        else if (cat.includes('ISO22000')) tagCls = 'tag-food';
+        else if (cat.includes('IATF')) tagCls = 'tag-auto';
+
         html += `
             <div class="question-card" id="q-${q.id}">
                 <div class="question-header">
                     <span class="question-number">${idx + 1}</span>
-                    <span class="question-tag ${categoryCls}">${catDisplay}</span>
+                    <span class="question-tag ${tagCls}">${q.category}</span>
                     <span class="question-score">${q.score} 分</span>
                 </div>
                 <div class="question-content">${q.content}</div>
-                <div class="question-options">
-        `;
+                <div class="question-options">`;
         q.options.forEach((opt, oi) => {
             const letter = String.fromCharCode(65 + oi);
-            // 去除选项文本中的字母前缀（如 "A. " "A、" "A．"），避免和动态字母徽章重复
             const cleanOpt = opt.replace(/^[A-Z][.、．\s]+\s*/, '');
-            const selected = userAnswers[q.id] === letter ? 'selected' : '';
+            const sel = userAnswers[q.id] === letter ? 'selected' : '';
             html += `
-                <label class="option-item ${selected}" onclick="selectOption(${q.id}, '${letter}', this)">
+                <label class="option-item ${sel}" onclick="selectOption(${q.id}, '${letter}', this)">
                     <input type="radio" name="q_${q.id}" value="${letter}" ${userAnswers[q.id] === letter ? 'checked' : ''}>
                     <span class="option-letter">${letter}</span>
                     <span class="option-text">${cleanOpt}</span>
-                </label>
-            `;
+                </label>`;
         });
         html += `</div></div>`;
     });
@@ -162,135 +232,104 @@ function renderQuestions() {
 
 function selectOption(qid, letter, el) {
     userAnswers[qid] = letter;
-    document.querySelectorAll(`#q-${qid} .option-item`).forEach(item => item.classList.remove('selected'));
+    document.querySelectorAll(`#q-${qid} .option-item`).forEach(i => i.classList.remove('selected'));
     el.classList.add('selected');
-    el.querySelector('input[type="radio"]').checked = true;
+    el.querySelector('input').checked = true;
     updateProgress();
 }
 
 function updateProgress() {
     const answered = Object.keys(userAnswers).length;
     const total = questions.length || 1;
-    const pct = Math.round((answered / total) * 100);
+    const pct = Math.round(answered / total * 100);
     document.getElementById('answeredCount').textContent = answered;
     document.getElementById('progressFill').style.width = pct + '%';
     document.getElementById('progressPercent').textContent = pct + '%';
 }
 
+// ========== 提交 ==========
 function submitExam() {
     const name = document.getElementById('exam_taker').value.trim();
+    if (!name) { alert('请先输入姓名'); return; }
     const answered = Object.keys(userAnswers).length;
     const total = questions.length;
-
     if (answered < total) {
-        if (!confirm(`您还有 ${total - answered} 题未作答，确定提交吗？`)) return;
-    } else {
-        if (!confirm('您已完成全部题目，确定提交吗？')) return;
+        if (!confirm(`还有 ${total - answered} 题未作答，确定提交？`)) return;
     }
-
     const btn = document.querySelector('#examActions .btn');
-    btn.disabled = true;
-    btn.textContent = '评分中...';
+    btn.disabled = true; btn.textContent = '评分中...';
 
     fetch('/api/exam/submit', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({ exam_taker: name, answers: userAnswers })
     })
     .then(res => res.json())
     .then(data => {
-        btn.disabled = false;
-        btn.textContent = '提交答卷';
-        if (data.success) { renderExamResult(data); }
-        else { alert(data.message || '提交失败'); }
+        btn.disabled = false; btn.textContent = '提交答卷';
+        if (data.success) renderResult(data);
+        else alert(data.message || '提交失败');
     })
-    .catch(() => {
-        btn.disabled = false;
-        btn.textContent = '提交答卷';
-        alert('网络错误，请重试');
-    });
+    .catch(() => { btn.disabled = false; btn.textContent = '提交答卷'; });
 }
 
-function renderExamResult(data) {
-    document.getElementById('examArea').style.display = 'none';
-    document.getElementById('examStats').style.display = 'none';
-
-    const passScore = 70;
-    const passed = data.score >= passScore;
+function renderResult(data) {
+    document.getElementById('questionList').innerHTML = '';
+    document.getElementById('examProgress').style.display = 'none';
+    document.getElementById('examActions').style.display = 'none';
+    const passed = data.score >= 70;
     const pct = Math.round(data.correct_count / data.total_questions * 100);
-
     let html = `
         <div class="result-card">
             <div class="result-header ${passed ? 'result-success' : 'result-error'}">
                 <span class="result-icon">${passed ? '🎉' : '😅'}</span>
-                <div>
-                    <h3>${passed ? '恭喜通过考试！' : '未通过，再接再厉！'}</h3>
-                    <p>${data.message}</p>
-                </div>
+                <div><h3>${passed ? '恭喜通过！' : '未通过，再接再厉！'}</h3><p>${data.message}</p></div>
             </div>
             <div class="result-body">
                 <div class="score-board">
-                    <div class="score-block score-total">
-                        <span class="score-num">${data.score}</span>
-                        <span class="score-lbl">总得分</span>
-                    </div>
-                    <div class="score-block score-correct">
-                        <span class="score-num">${data.correct_count}</span>
-                        <span class="score-lbl">正确</span>
-                    </div>
-                    <div class="score-block score-wrong">
-                        <span class="score-num">${data.total_questions - data.correct_count}</span>
-                        <span class="score-lbl">错误</span>
-                    </div>
-                    <div class="score-block score-rate">
-                        <span class="score-num">${pct}%</span>
-                        <span class="score-lbl">正确率</span>
-                    </div>
+                    <div class="score-block score-total"><span class="score-num">${data.score}</span><span class="score-lbl">总得分</span></div>
+                    <div class="score-block score-correct"><span class="score-num">${data.correct_count}</span><span class="score-lbl">正确</span></div>
+                    <div class="score-block score-wrong"><span class="score-num">${data.total_questions - data.correct_count}</span><span class="score-lbl">错误</span></div>
+                    <div class="score-block score-rate"><span class="score-num">${pct}%</span><span class="score-lbl">正确率</span></div>
                 </div>
-
-                <div class="detail-list">
-                    <div class="detail-title">答题详情</div>
-    `;
+                <div class="detail-list"><div class="detail-title">答题详情</div>`;
     data.details.forEach((d, idx) => {
-        const correct = d.is_correct;
-        const cardCls = correct ? 'detail-correct' : 'detail-wrong';
+        const cls = d.is_correct ? 'detail-correct' : 'detail-wrong';
         html += `
-            <div class="detail-card ${cardCls}">
-                <div class="d-header">
-                    <span>第 ${idx + 1} 题 ${correct ? '✅' : '❌'}</span>
-                    <span>${correct ? '+' + d.score + ' 分' : '0 分'}</span>
-                </div>
+            <div class="detail-card ${cls}">
+                <div class="d-header"><span>第${idx+1}题 ${d.is_correct?'✅':'❌'}</span><span>${d.is_correct?'+'+d.score:'0'}分</span></div>
                 <div class="d-question">${d.content}</div>
                 <div class="d-answer">
-                    <p>你的答案：<span class="${correct ? 'correct' : 'wrong'}">${d.user_answer || '未作答'}</span></p>
-                    ${correct ? '' : `<p>正确答案：<span class="correct">${d.correct_answer}</span></p>`}
+                    <p>你的答案：<span class="${d.is_correct?'correct':'wrong'}">${d.user_answer||'未作答'}</span></p>
+                    ${d.is_correct?'':`<p>正确答案：<span class="correct">${d.correct_answer}</span></p>`}
                 </div>
-            </div>
-        `;
+            </div>`;
     });
-    html += `
-                </div>
-                <div style="text-align:center; margin-top: 24px;">
-                    <button class="btn btn-outline" onclick="resetExam()">重新考试</button>
-                </div>
-            </div>
-        </div>
-    `;
+    html += `</div>
+        <div style="text-align:center;margin-top:24px;display:flex;gap:12px;justify-content:center;">
+            <button class="btn btn-outline" onclick="resetExam()">重考此类型</button>
+            <button class="btn btn-primary" onclick="backToTypes()">选择其他考试</button>
+        </div></div></div>`;
     document.getElementById('examResult').innerHTML = html;
     document.getElementById('examResult').style.display = 'block';
     document.getElementById('examResult').scrollIntoView({ behavior: 'smooth' });
 }
 
 function resetExam() {
-    questions = [];
-    userAnswers = {};
-    document.getElementById('examArea').style.display = 'none';
     document.getElementById('examResult').style.display = 'none';
-    document.getElementById('examStats').style.display = 'none';
-    const btn = document.getElementById('btn-start');
-    btn.disabled = false;
-    btn.textContent = '开始考试';
-    document.getElementById('exam_taker').focus();
+    document.getElementById('questionList').innerHTML = '';
+    document.getElementById('exam_taker').value = '';
+    userAnswers = {};
+    questions = [];
+    startExam(currentExamType);
 }
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+function escapeJs(s) { return s.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '\\"'); }
 </script>
 {% endblock %}

@@ -57,6 +57,7 @@ def init_database():
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS exam_records (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER REFERENCES users(id), -- 关联用户
             exam_taker TEXT NOT NULL,         -- 考生姓名
             score INTEGER NOT NULL,           -- 得分
             total_questions INTEGER NOT NULL, -- 总题数

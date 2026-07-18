@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}我的订单 - 垚博企管{% endblock %}
+{% block title %}个人中心 - 垚博企管{% endblock %}
 
 {% block content %}
 <section class="hero" style="min-height: auto; padding: 160px 0 80px;">
@@ -7,7 +7,7 @@
     <div class="container">
         <div class="hero-content" style="text-align: center;">
             <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 8px;"><a href="/" style="color: var(--text-muted); text-decoration: none;">首页</a></p>
-            <h1>我的订单</h1>
+            <h1>个人中心</h1>
             <p style="margin-top: 12px; font-size: 13px; color: var(--text-muted);">
                 👤 {{ user.username }} · <a href="/auth/logout" style="color: var(--accent-gold);">退出登录</a>
             </p>
@@ -17,35 +17,58 @@
 
 <section class="section">
     <div class="container" style="max-width: 800px; margin: 0 auto;">
-        {% if orders|length == 0 %}
-        <div style="text-align: center; padding: 60px 0; color: var(--text-secondary);">
-            <p style="font-size: 18px;">暂无订单</p>
-            <p style="margin-top: 12px;"><a href="/courses" style="color: var(--accent-gold);">去选课 →</a></p>
-        </div>
-        {% else %}
-        <div style="display: flex; flex-direction: column; gap: 16px;">
-            {% for order in orders %}
-            <div class="order-card">
-                <div class="order-header">
-                    <span class="order-course-title">{{ order.course_title }}</span>
-                    <span class="order-badge order-badge-{{ order.status }}">{% if order.status == 'paid' %}已支付{% elif order.status == 'pending' %}待支付{% elif order.status == 'cancelled' %}已取消{% else %}{{ order.status }}{% endif %}</span>
-                </div>
-                <div class="order-info">
-                    <span>订单号：{{ order.order_no }}</span>
-                    <span>金额：¥{{ "%.2f"|format(order.amount / 100) }}</span>
-                    <span>时间：{{ order.created_at[:10] }}</span>
-                </div>
-                <div class="order-actions">
-                    {% if order.status == 'paid' %}
-                    <a href="/courses/{{ order.course_id }}" class="btn btn-outline" style="font-size: 13px; padding: 6px 16px;">进入课程 →</a>
-                    {% elif order.status == 'pending' %}
-                    <a href="/courses/{{ order.course_id }}" class="btn btn-primary" style="font-size: 13px; padding: 6px 16px;">去支付</a>
-                    {% endif %}
-                </div>
+
+        <!-- 课程权限 -->
+        <div style="margin-bottom: 32px;">
+            <h3 style="margin-bottom: 12px;">📚 我的课程</h3>
+            {% if courses|length == 0 %}
+            <div style="text-align: center; padding: 40px; color: var(--text-secondary); background: var(--bg-card); border-radius: 12px;">
+                <p>暂无课程权限</p>
+                <p style="font-size: 13px; margin-top: 4px;"><a href="javascript:showContactQr()" style="color:var(--accent-gold);text-decoration:underline;">联系垚博企管开通课程权限</a></p>
             </div>
-            {% endfor %}
+            {% else %}
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+                {% for c in courses %}
+                <a href="/courses/{{ c.id }}" class="cert-card" style="text-decoration:none;flex-direction:row;align-items:center;justify-content:space-between;padding:14px 20px;">
+                    <div>
+                        <strong>{{ c.title }}</strong>
+                        <span style="color:#999;font-size:12px;margin-left:8px;">{{ c.chapters_count or 0 }} 章</span>
+                    </div>
+                    <span style="color:var(--accent-gold);font-size:13px;">进入学习 →</span>
+                </a>
+                {% endfor %}
+            </div>
+            {% endif %}
         </div>
-        {% endif %}
+
+        <!-- 考试权限 -->
+        <div style="margin-bottom: 32px;">
+            <h3 style="margin-bottom: 12px;">📝 我的考试</h3>
+            {% if exams|length == 0 %}
+            <div style="text-align: center; padding: 40px; color: var(--text-secondary); background: var(--bg-card); border-radius: 12px;">
+                <p>暂无考试权限</p>
+                <p style="font-size: 13px; margin-top: 4px;"><a href="javascript:showContactQr()" style="color:var(--accent-gold);text-decoration:underline;">联系垚博企管开通考试权限</a></p>
+            </div>
+            {% else %}
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+                {% for e in exams %}
+                <a href="/exam" class="cert-card" style="text-decoration:none;flex-direction:row;align-items:center;justify-content:space-between;padding:14px 20px;">
+                    <div>
+                        <strong>{{ e }}</strong>
+                    </div>
+                    <span style="color:var(--accent-gold);font-size:13px;">去考试 →</span>
+                </a>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- 联系信息 -->
+        <div style="text-align: center; padding: 24px; background: var(--bg-card); border-radius: 12px; color: var(--text-secondary); font-size: 13px;">
+            <p>如需开通更多课程或考试，<a href="javascript:showContactQr()" style="color:var(--accent-gold);text-decoration:underline;">请联系垚博企管</a></p>
+            <p style="margin-top: 4px;">📞 18025926208 / 18122825922</p>
+        </div>
+
     </div>
 </section>
 {% endblock %}

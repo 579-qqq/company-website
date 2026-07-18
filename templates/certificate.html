@@ -44,7 +44,7 @@
             <ul>
                 <li>请输入与证书上一致的姓名和身份证号码</li>
                 <li>身份证号码为18位（含字母X）</li>
-                <li>如有疑问请联系：0769-81707950 / 0769-86652162</li>
+                <li>如有疑问请联系：0769-81707950 / 13790321690</li>
             </ul>
         </div>
     </div>
@@ -108,10 +108,18 @@ function renderCertificates(data) {
     data.certificates.forEach(cert => {
         const cls = cert.status === '有效' ? 'tag-valid' : (cert.status === '过期' ? 'tag-expired' : 'tag-revoked');
         const statusMap = { '有效': '✓ 有效', '过期': '✗ 已过期', '吊销': '✗ 已吊销' };
+        const photoHtml = cert.photo_url
+            ? `<div class="cert-photo"><img src="${cert.photo_url}" alt="证书照片" onclick="window.open('${cert.photo_url}')" title="点击放大"></div>`
+            : '';
+        const qualType = cert.qualification_type
+            ? `<span class="cert-qual-tag">📘 ${cert.qualification_type}</span>`
+            : '';
         html += `
             <div class="cert-card">
+                ${photoHtml}
                 <div class="cert-info">
                     <h4>${cert.cert_name}</h4>
+                    ${qualType}
                     <p>编号：${cert.cert_number}</p>
                     <p>发证：${cert.issue_date} &nbsp;|&nbsp; 有效期至：${cert.expire_date}</p>
                 </div>

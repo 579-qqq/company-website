@@ -1,0 +1,26 @@
+User-agent: Baiduspider
+Disallow:
+Allow: /
+
+User-agent: Baiduspider-image
+Disallow:
+Allow: /
+
+User-agent: Baiduspider-video
+Disallow:
+Allow: /
+
+User-agent: Baiduspider-news
+Disallow:
+Allow: /
+
+User-agent: Googlebot
+Disallow:
+Allow: /
+
+User-agent: *
+Disallow: /api/
+Disallow: /auth/
+Disallow: /user/
+
+Sitemap: https://ybqg.work/sitemap.xml
