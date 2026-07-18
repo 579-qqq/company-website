@@ -1,0 +1,145 @@
+﻿{% extends "base.html" %}
+{% block title %}垚博企管 - 东莞市垚博企业管理咨询有限公司{% endblock %}
+
+{% block content %}
+<!-- ===== Hero 全屏沉浸区域 ===== -->
+<section class="hero">
+    <div class="hero-glow hero-glow-1"></div>
+    <div class="hero-glow hero-glow-2"></div>
+    <div class="container">
+        <div class="hero-content">
+            <div class="hero-badge">✦ 中小微企业的变革引领者</div>
+            <h1>
+                助力中小微制造型企业<br>
+                <span class="highlight">降本增效 · 流程再造</span>
+            </h1>
+            <p class="hero-subtitle">垚博企管 · 从心出发 · 保姆式落地辅导</p>
+            <p class="hero-desc">
+                垚博咨询始终坚持从心出发，以保姆式解决企业问题为核心、以结果为导向，
+                真正落地生根的实战、实用、实效的咨询模式，
+                被业界誉为"中小微企业的变革引领者"和职场朋友的"黄埔军校"。
+            </p>
+            <div class="hero-actions">
+                <a href="/certificate" class="btn btn-primary">证书查询</a>
+                <a href="/exam" class="btn btn-secondary">在线考试 →</a>
+            </div>
+            <div class="hero-stats">
+                <div class="hero-stat-item">
+                    <div class="hero-stat-number">287家</div>
+                    <div class="hero-stat-label">企业战略转型</div>
+                </div>
+                <div class="hero-stat-item">
+                    <div class="hero-stat-number">614家</div>
+                    <div class="hero-stat-label">体系认证辅导</div>
+                </div>
+                <div class="hero-stat-item">
+                    <div class="hero-stat-number">751家</div>
+                    <div class="hero-stat-label">企业培训</div>
+                </div>
+                <div class="hero-stat-item">
+                    <div class="hero-stat-number">18人</div>
+                    <div class="hero-stat-label">全职+兼职咨询师</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ===== 快速导航卡片 ===== -->
+<section class="section">
+    <div class="container">
+        <div class="section-header">
+            <div class="section-tag">Explore</div>
+            <h2 class="section-title">了解更多</h2>
+            <p class="section-desc">点击下方卡片，深入了解垚博企管</p>
+        </div>
+        <div class="about-grid">
+            <a href="/about" class="about-card nav-card">
+                <h3>关于我们</h3>
+                <p>公司概况、企业文化、发展历程、核心团队</p>
+            </a>
+            <a href="/services" class="about-card nav-card">
+                <h3>核心业务</h3>
+                <p>管理咨询、体系认证、项目流程、服务优势</p>
+            </a>
+            <a href="/training" class="about-card nav-card">
+                <h3>培训课程</h3>
+                <p>六大课程体系，实战干货，一年陪跑服务</p>
+            </a>
+            <a href="/certificate" class="about-card nav-card">
+                <h3>证书查询</h3>
+                <p>输入姓名和身份证号，快速查询您的证书信息</p>
+            </a>
+            <a href="/exam" class="about-card nav-card">
+                <h3>在线考试</h3>
+                <p>随机抽题、自动评分，检验学习成果</p>
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- ===== 实景展示 ===== -->
+<section class="photo-strip">
+    <img src="{{ url_for('static', filename='images/6ff784a35ea13e21dac8368e350a24da.jpg') }}" alt="垚博企管实景">
+</section>
+
+<!-- ===== 联系我们 ===== -->
+<section class="section contact-section">
+    <div class="container">
+        <div class="section-header">
+            <div class="section-tag">Contact</div>
+            <h2 class="section-title">联系我们</h2>
+            <p class="section-desc">欢迎来电咨询，为您提供免费初步诊断</p>
+        </div>
+        <div class="contact-grid">
+            <div class="contact-info-cards">
+                <div class="contact-item">
+                    <span class="contact-icon">📍</span>
+                    <div class="contact-text">
+                        <strong>公司地址</strong>
+                        东莞市石排镇工业大道松泰大厦20号306
+                    </div>
+                </div>
+                <div class="contact-item">
+                    <span class="contact-icon">📞</span>
+                    <div class="contact-text">
+                        <strong>咨询电话</strong>
+                        0769-81707950 / 0769-86652162
+                    </div>
+                </div>
+                <div class="contact-item">
+                    <span class="contact-icon">📱</span>
+                    <div class="contact-text">
+                        <strong>手机联系</strong>
+                        18025926208 / 18122825922（罗老师）
+                    </div>
+                </div>
+                <div class="contact-item">
+                    <span class="contact-icon">📧</span>
+                    <div class="contact-text">
+                        <strong>电子邮箱</strong>
+                        stone_laoluo@163.com
+                    </div>
+                </div>
+            </div>
+            <div class="contact-info-cards">
+                <div class="contact-item">
+                    <span class="contact-icon">🏛️</span>
+                    <div class="contact-text">
+                        <strong>开户银行</strong>
+                        中国工商银行东莞石排支行
+                    </div>
+                </div>
+                <div class="contact-item">
+                    <span class="contact-icon">💳</span>
+                    <div class="contact-text">
+                        <strong>公司账户</strong>
+                        东莞市垚博企业管理咨询有限公司<br>
+                        账号：2010024309200149984
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+{% block title %}垚博企管 - 证书查询{% endblock %}
+
+{% block content %}
+<!-- ===== 页面顶部 ===== -->
+<section class="page-hero">
+    <div class="container page-hero-content">
+        <h1>证书查询</h1>
+        <p>输入姓名和身份证号，快速查询您的证书信息</p>
+    </div>
+</section>
+
+<!-- ===== 查询表单 ===== -->
+<section class="section" style="padding-top: 0;">
+    <div class="container">
+        <div class="query-wrapper">
+            <div class="query-form">
+                <div class="form-group">
+                    <label for="name">姓名</label>
+                    <input type="text" id="name" class="form-input" placeholder="请输入与证书一致的姓名" maxlength="50">
+                </div>
+                <div class="form-group">
+                    <label for="id_number">身份证号码</label>
+                    <input type="text" id="id_number" class="form-input" placeholder="请输入18位身份证号码" maxlength="18">
+                </div>
+                <button id="btn-query" class="btn btn-primary btn-full" onclick="queryCertificate()">
+                    查询证书
+                </button>
+            </div>
+        </div>
+
+        <!-- 加载动画 -->
+        <div id="loading" class="loading" style="display:none;">
+            <div class="spinner"></div>
+            <p>正在查询中，请稍候...</p>
+        </div>
+
+        <!-- 查询结果 -->
+        <div id="result" class="query-result-area" style="display:none;"></div>
+
+        <!-- 使用说明 -->
+        <div class="tips">
+            <h4>使用须知</h4>
+            <ul>
+                <li>请输入与证书上一致的姓名和身份证号码</li>
+                <li>身份证号码为18位（含字母X）</li>
+                <li>如有疑问请联系：0769-81707950 / 0769-86652162</li>
+            </ul>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+function queryCertificate() {
+    const name = document.getElementById('name').value.trim();
+    const idNumber = document.getElementById('id_number').value.trim();
+
+    if (!name) { showResult('error', '请输入姓名'); document.getElementById('name').focus(); return; }
+    if (!idNumber) { showResult('error', '请输入身份证号码'); document.getElementById('id_number').focus(); return; }
+    if (idNumber.length < 15) { showResult('error', '请输入完整的身份证号码'); return; }
+
+    const btn = document.getElementById('btn-query');
+    const loading = document.getElementById('loading');
+    const result = document.getElementById('result');
+
+    btn.disabled = true;
+    btn.textContent = '查询中...';
+    loading.style.display = 'block';
+    result.style.display = 'none';
+
+    fetch('/api/certificate/query', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: name, id_number: idNumber })
+    })
+    .then(res => res.json())
+    .then(data => {
+        loading.style.display = 'none';
+        btn.disabled = false;
+        btn.textContent = '查询证书';
+        if (data.success) { renderCertificates(data); }
+        else { showResult('error', data.message); }
+    })
+    .catch(() => {
+        loading.style.display = 'none';
+        btn.disabled = false;
+        btn.textContent = '查询证书';
+        showResult('error', '网络错误，请稍后重试');
+    });
+}
+
+function renderCertificates(data) {
+    const result = document.getElementById('result');
+    let html = `
+        <div class="result-card">
+            <div class="result-header result-success">
+                <span class="result-icon">✅</span>
+                <div>
+                    <h3>查询成功</h3>
+                    <p>共找到 <strong>${data.count}</strong> 条证书记录 — ${data.name}</p>
+                </div>
+            </div>
+            <div class="result-body">
+                <div class="cert-list">
+    `;
+    data.certificates.forEach(cert => {
+        const cls = cert.status === '有效' ? 'tag-valid' : (cert.status === '过期' ? 'tag-expired' : 'tag-revoked');
+        const statusMap = { '有效': '✓ 有效', '过期': '✗ 已过期', '吊销': '✗ 已吊销' };
+        html += `
+            <div class="cert-card">
+                <div class="cert-info">
+                    <h4>${cert.cert_name}</h4>
+                    <p>编号：${cert.cert_number}</p>
+                    <p>发证：${cert.issue_date} &nbsp;|&nbsp; 有效期至：${cert.expire_date}</p>
+                </div>
+                <span class="cert-tag ${cls}">${statusMap[cert.status] || cert.status}</span>
+            </div>
+        `;
+    });
+    html += `</div></div></div>`;
+    result.innerHTML = html;
+    result.style.display = 'block';
+    result.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function showResult(type, msg) {
+    const result = document.getElementById('result');
+    const icon = type === 'error' ? '❌' : '⚠️';
+    const cls = type === 'error' ? 'result-error' : 'result-success';
+    result.innerHTML = `
+        <div class="result-card">
+            <div class="result-header ${cls}">
+                <span class="result-icon">${icon}</span>
+                <div>
+                    <h3>${type === 'error' ? '查询失败' : '提示'}</h3>
+                    <p>${msg}</p>
+                </div>
+            </div>
+        </div>
+    `;
+    result.style.display = 'block';
+}
+</script>
+{% endblock %}

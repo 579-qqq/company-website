@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}在线课程 - 垚博企管{% endblock %}
+
+{% block content %}
+<!-- ===== Hero 全屏区域（与首页统一） ===== -->
+<section class="hero">
+    <div class="hero-glow hero-glow-1"></div>
+    <div class="hero-glow hero-glow-2"></div>
+    <div class="container">
+        <div class="hero-content" style="text-align: center;">
+            <div class="hero-badge">✦ 实战专家 · 在线授课</div>
+            <h1>
+                企业核心管理技能<br>
+                <span class="highlight">在线课程</span>
+            </h1>
+            <p class="hero-subtitle">随时随地学习，让管理变革不再遥远</p>
+            <p class="hero-desc">
+                垚博企管邀请十余年一线实战经验的咨询师，
+                将驻厂辅导的核心方法论浓缩为在线课程，
+                帮助企业管理者足不出户掌握降本增效、流程再造的核心技能。
+            </p>
+            {% if user %}
+            {% else %}
+            <div class="hero-actions">
+                <a href="/auth/register" class="btn btn-primary">立即注册</a>
+                <a href="/auth/login" class="btn btn-secondary">登录学习 →</a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</section>
+
+<!-- ===== 课程列表 ===== -->
+<section class="section">
+    <div class="container">
+        {% if courses|length == 0 %}
+        <div style="text-align: center; padding: 60px 0; color: var(--text-secondary);">
+            <p style="font-size: 18px;">课程正在筹备中，敬请期待</p>
+        </div>
+        {% else %}
+        <div class="about-grid">
+            {% for course in courses %}
+            <a href="/courses/{{ course.id }}" class="about-card nav-card">
+                <h3>{{ course.title }}</h3>
+                <p>{{ course.description }}</p>
+                <p class="course-price-text">
+                    <span class="price-current">¥{{ "%.2f"|format(course.price / 100) }}</span>
+                    {% if course.original_price %}
+                    <span class="price-original">¥{{ "%.2f"|format(course.original_price / 100) }}</span>
+                    {% endif %}
+                </p>
+            </a>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

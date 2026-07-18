@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% block title %}注册 - 垚博企管{% endblock %}
+
+{% block content %}
+<section class="hero" style="min-height: auto; padding: 160px 0 80px;">
+    <div class="hero-glow hero-glow-1"></div>
+    <div class="container">
+        <div class="hero-content" style="text-align: center;">
+            <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 8px;"><a href="/" style="color: var(--text-muted); text-decoration: none;">首页</a></p>
+            <h1>用户注册</h1>
+            <p style="color: var(--text-muted);">注册后即可购买课程，开启学习之旅</p>
+        </div>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container" style="max-width: 440px; margin: 0 auto;">
+        <div class="auth-card">
+            <form id="register-form" onsubmit="return false;">
+                <div class="form-group">
+                    <label for="username">用户名</label>
+                    <input type="text" id="username" name="username" placeholder="请输入您的姓名" required>
+                </div>
+                <div class="form-group">
+                    <label for="phone">手机号</label>
+                    <input type="tel" id="phone" name="phone" placeholder="请输入11位手机号" maxlength="11" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">密码</label>
+                    <input type="password" id="password" name="password" placeholder="请设置密码（至少6位）" required minlength="6">
+                </div>
+                <div class="form-error" id="form-error" style="display: none;"></div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;" onclick="handleRegister()">注册</button>
+            </form>
+            <p style="text-align: center; margin-top: 20px; color: var(--text-secondary); font-size: 14px;">
+                已有账号？<a href="/auth/login" style="color: var(--accent-gold);">去登录 →</a>
+            </p>
+        </div>
+    </div>
+</section>
+
+{% block extra_scripts %}
+<script>
+function handleRegister() {
+    var btn = document.querySelector('#register-form button');
+    var errDiv = document.getElementById('form-error');
+    btn.disabled = true;
+    btn.textContent = '注册中...';
+    errDiv.style.display = 'none';
+
+    fetch('/api/auth/register', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+            username: document.getElementById('username').value.trim(),
+            phone: document.getElementById('phone').value.trim(),
+            password: document.getElementById('password').value
+        })
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+        if (data.success) {
+            window.location.href = '/courses';
+        } else {
+            errDiv.textContent = data.message;
+            errDiv.style.display = 'block';
+        }
+    })
+    .catch(function() {
+        errDiv.textContent = '网络错误，请重试';
+        errDiv.style.display = 'block';
+    })
+    .finally(function() {
+        btn.disabled = false;
+        btn.textContent = '注册';
+    });
+}
+
+document.getElementById('password').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') handleRegister();
+});
+</script>
+{% endblock %}
+{% endblock %}

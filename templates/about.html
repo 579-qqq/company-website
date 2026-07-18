@@ -1,0 +1,140 @@
+﻿{% extends "base.html" %}
+{% block title %}关于我们 - 垚博企管{% endblock %}
+
+{% block content %}
+<section class="page-hero">
+    <div class="container page-hero-content">
+        <h1>关于垚博</h1>
+        <p>从心出发，帮助企业实现利润增长</p>
+    </div>
+</section>
+
+<div class="photo-strip">
+    <img src="{{ url_for('static', filename='images/6ff784a35ea13e21dac8368e350a24da.jpg') }}" alt="垚博企管">
+</div>
+
+<!-- 公司概况 -->
+<section class="section">
+    <div class="container">
+        <div class="section-header">
+            <div class="section-tag">Overview</div>
+            <h2 class="section-title">公司概况</h2>
+            <p class="section-desc">助力中小微制造型企业流程运行、降本增效、人才梯队建设</p>
+        </div>
+        <div class="about-grid">
+            <div class="about-card">
+                <h3>公司概况</h3>
+                <p>东莞市垚博企业管理咨询有限公司成立于2017年12月，2020年5月从南城搬迁至东莞石排。主要从事企业管理咨询（项目咨询、体系认证和辅导）和人才择业指导及就业和创业指导的相关业务，助力中小微制造型企业的流程运行、降本增效、人才梯队建设。</p>
+            </div>
+            <div class="about-card">
+                <h3>服务理念</h3>
+                <p>始终坚持从心出发，以保姆式解决企业问题为核心，以结果为导向，真正落地生根的实战、实用、实效的咨询模式；被业界誉为"中小微企业的变革引领者"和职场朋友的"黄埔军校"。</p>
+            </div>
+            <div class="about-card">
+                <h3>服务范围</h3>
+                <p>业务覆盖广东（东莞、深圳、惠州、中山、佛山、顺德、韶关、河源、江门）、四川达州、河南信阳、湖南郴州、湖北荆州、安徽合肥、贵州遵义等地。</p>
+            </div>
+            <div class="about-card">
+                <h3>服务行业</h3>
+                <p>涉及新能源、连接器、耳机、键鼠、音响、路由器、电源、机械、印刷、光电、化工等行业；合作的客户有国企、台资、民企等，被客户称为"值得信赖的良心企管专家"。</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- 企业文化 -->
+<section class="section section-alt" id="culture">
+    <div class="container">
+        <div class="section-header">
+            <div class="section-tag">Culture</div>
+            <h2 class="section-title">企业文化</h2>
+            <p class="section-desc">从心出发，帮助企业实现利润增长</p>
+        </div>
+        <div class="about-grid">
+            <div class="about-card">
+                <h3>企业使命</h3>
+                <p>从心出发，帮助企业实现利润增长。</p>
+            </div>
+            <div class="about-card">
+                <h3>企业愿景</h3>
+                <p>成为行业一流咨询公司、受人尊敬、具有竞争力的企管服务商。</p>
+            </div>
+            <div class="about-card">
+                <h3>核心价值观</h3>
+                <p><strong>诚信</strong> — 以诚待人，信守承诺<br>
+                   <strong>感恩</strong> — 心怀感恩，回馈客户<br>
+                   <strong>创新</strong> — 持续创新，追求卓越<br>
+                   <strong>专注</strong> — 专注行业，深耕细作<br>
+                   <strong>分享</strong> — 知识分享，共同成长</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- 发展历程 -->
+<section class="section">
+    <div class="container">
+        <div class="section-header">
+            <div class="section-tag">Timeline</div>
+            <h2 class="section-title">发展历程</h2>
+            <p class="section-desc">一步一个脚印，与服务企业共同成长</p>
+        </div>
+        <div class="timeline">
+            <div class="timeline-item">
+                <div class="timeline-dot">
+                    <div class="timeline-dot-circle"></div>
+                    <span class="timeline-year">2017</span>
+                </div>
+                <div class="timeline-content">
+                    <h4>公司成立</h4>
+                    <p>在东莞南城鸿福路72号成立，主要做体系认证、6S目视化管理、猎头服务等项目</p>
+                </div>
+            </div>
+            <div class="timeline-item">
+                <div class="timeline-dot">
+                    <div class="timeline-dot-circle"></div>
+                    <span class="timeline-year">2018-2019</span>
+                </div>
+                <div class="timeline-content">
+                    <h4>项目拓展</h4>
+                    <p>做理工学院的一镇一品培训，协助企业搭建培训班或商学院；主要做体系认证、精益生产、交期提升、品质改善、6S目视化管理、猎头服务等项目</p>
+                </div>
+            </div>
+            <div class="timeline-item">
+                <div class="timeline-dot">
+                    <div class="timeline-dot-circle"></div>
+                    <span class="timeline-year">2020</span>
+                </div>
+                <div class="timeline-content">
+                    <h4>公司搬迁</h4>
+                    <p>从南城搬迁至东莞石排，主打企业的项目咨询、体系认证及辅导、验厂辅导、企业培训和政府补贴培训、个人培训（不做猎头项目）</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- 核心团队入口 -->
+<section class="section section-alt">
+    <div class="container">
+        <div class="section-header">
+            <div class="section-tag">Team</div>
+            <h2 class="section-title">核心团队</h2>
+            <p class="section-desc">实战型咨询团队，懂企业、能落地、重实效</p>
+        </div>
+        <div class="photo-gallery col-2" style="max-width:700px; margin:0 auto;">
+            <div class="photo-card square">
+                <img src="{{ url_for('static', filename='images/photo_luocheng.jpeg') }}" alt="罗城" loading="lazy">
+                <div class="photo-card-icon">+</div>
+            </div>
+            <div class="photo-card square">
+                <img src="{{ url_for('static', filename='images/photo_hujun.jpeg') }}" alt="胡骏" loading="lazy">
+                <div class="photo-card-icon">+</div>
+            </div>
+        </div>
+        <div style="text-align:center; margin-top:28px;">
+            <a href="/about/team" class="btn btn-outline">查看完整团队 →</a>
+        </div>
+    </div>
+</section>
+{% endblock %}

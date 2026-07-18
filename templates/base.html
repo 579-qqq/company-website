@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}垚博企管 - 东莞市垚博企业管理咨询有限公司{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+    <!-- ===== 导航栏 ===== -->
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="/" class="logo">
+                <span class="logo-badge"><img src="{{ url_for('static', filename='images/company_logo.jpg') }}" alt="垚博企管" class="logo-img"></span>
+            </a>
+            <ul class="nav-menu">
+                <li><a href="/" class="nav-link {% if request.path == '/' %}active{% endif %}">首页</a></li>
+                <li class="nav-dropdown">
+                    <a href="/about" class="nav-link {% if request.path == '/about' or request.path == '/about/team' %}active{% endif %}">关于我们 <span class="nav-arrow">▾</span></a>
+                    <ul class="nav-submenu">
+                        <li><a href="/about#culture">企业文化</a></li>
+                        <li><a href="/about/team">核心团队</a></li>
+                    </ul>
+                </li>
+                <li class="nav-dropdown">
+                    <a href="/services" class="nav-link {% if request.path == '/services' or request.path == '/services/consulting' or request.path == '/services/certification' %}active{% endif %}">核心业务 <span class="nav-arrow">▾</span></a>
+                    <ul class="nav-submenu">
+                        <li><a href="/services/consulting">管理咨询</a></li>
+                        <li><a href="/services/certification">体系认证</a></li>
+                    </ul>
+                </li>
+                <li><a href="/training" class="nav-link {% if request.path == '/training' %}active{% endif %}">培训课程</a></li>
+                <li><a href="/courses" class="nav-link nav-cta {% if request.path == '/courses' or '/courses/' in request.path %}active{% endif %}">在线课程</a></li>
+                <li><a href="/certificate" class="nav-link nav-cta {% if request.path == '/certificate' %}active{% endif %}">证书查询</a></li>
+                <li><a href="/exam" class="nav-link nav-cta {% if request.path == '/exam' %}active{% endif %}">在线考试</a></li>
+                {% if user %}
+                <li class="nav-dropdown">
+                    <a href="/user/orders" class="nav-link {% if request.path == '/user/orders' %}active{% endif %}">👤 {{ user.username }} <span class="nav-arrow">▾</span></a>
+                    <ul class="nav-submenu">
+                        <li><a href="/user/orders">我的订单</a></li>
+                        <li><a href="/auth/logout">退出登录</a></li>
+                    </ul>
+                </li>
+                {% else %}
+                <li><a href="/auth/login" class="nav-link {% if request.path == '/auth/login' %}active{% endif %}">登录</a></li>
+                {% endif %}
+            </ul>
+        </div>
+    </nav>
+
+    <!-- ===== 页面内容 ===== -->
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- ===== 页脚 ===== -->
+    <footer class="footer">
+        <div class="container footer-inner">
+            <div class="footer-brand">
+                <img src="{{ url_for('static', filename='images/company_logo.jpg') }}" alt="垚博企管" class="footer-logo-img">
+                <span>垚博企管</span>
+            </div>
+            <div class="footer-text">
+                <p>&copy; 2017-2026 东莞市垚博企业管理咨询有限公司 版权所有</p>
+                <p>0769-81707950 &nbsp;·&nbsp; stone_laoluo@163.com</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>

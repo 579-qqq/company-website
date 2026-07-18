@@ -1,0 +1,207 @@
+﻿{% extends "base.html" %}
+{% block title %}核心业务 - 垚博企管{% endblock %}
+
+{% block content %}
+<section class="page-hero">
+    <div class="container page-hero-content">
+        <h1>核心业务</h1>
+        <p>三大业务板块，为企业提供全方位管理咨询服务</p>
+    </div>
+</section>
+
+<div class="photo-strip">
+    <img src="{{ url_for('static', filename='images/6ff784a35ea13e21dac8368e350a24da.jpg') }}" alt="垚博企管">
+</div>
+
+<!-- 服务项目 -->
+<section class="section">
+    <div class="container">
+        <div class="section-header">
+            <div class="section-tag">Services</div>
+            <h2 class="section-title">核心业务</h2>
+            <p class="section-desc">管理咨询 · 体系认证 · 企业培训</p>
+        </div>
+        <div style="text-align:center; margin-bottom: 40px;">
+            <img src="{{ url_for('static', filename='images/illus_services.jpeg') }}" alt="核心业务" style="max-width: 500px; width: 100%; height: auto; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08);">
+        </div>
+        <div class="about-grid">
+            <a href="/services/consulting" class="about-card service-link-card">
+                <h3>管理咨询 <span class="card-arrow-link">→</span></h3>
+                <p>企业战略规划、组织架构设计、团队打造、生产管理、PMC搭建、品质管理、绩效管理、成本控制、企业文化等。</p>
+                <span class="card-link-text">查看详情 →</span>
+            </a>
+            <a href="/services/certification" class="about-card service-link-card">
+                <h3>体系认证 <span class="card-arrow-link">→</span></h3>
+                <p>ISO9001、ISO14001、ISO45001、IATF16949等体系认证辅导。快速拿证，可选认证补贴方式，周期3-6个月。</p>
+                <span class="card-link-text">查看详情 →</span>
+            </a>
+            <a href="/training" class="about-card service-link-card">
+                <h3>企业培训 <span class="card-arrow-link">→</span></h3>
+                <p>提供经营管理、战略规划、团队打造、品质管理、绩效管理、ISO体系、6S、IE工程等20余门实战课程。</p>
+                <span class="card-link-text">查看详情 →</span>
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- 企业架构 -->
+<section class="section section-alt">
+    <div class="container">
+        <div class="section-header">
+            <div class="section-tag">Structure</div>
+            <h2 class="section-title">企业架构</h2>
+            <p class="section-desc">三大业务方向，全面服务企业成长</p>
+        </div>
+        <div class="about-grid">
+            <div class="about-card">
+                <h3>企业管理咨询</h3>
+                <p>管理咨询 · 体系认证 · 企业培训<br>
+                项目咨询、体系辅导、验厂辅导、目标建立及推行、团队打造、流程再造、交期提升、品质保证、精益生产、成本控制、企业文化建设</p>
+            </div>
+            <div class="about-card">
+                <h3>人才择业指导</h3>
+                <p>职业规划 · 自我提升 · 岗位突破 · 考取证书<br>
+                帮助职场人士找准方向、提升能力、实现职业突破</p>
+            </div>
+            <div class="about-card">
+                <h3>人力资源服务</h3>
+                <p>猎头服务 · 人才测评<br>
+                为企业精准匹配人才，为人才匹配适合的岗位</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- 项目流程 -->
+<section class="section">
+    <div class="container">
+        <div class="section-header">
+            <div class="section-tag">Process</div>
+            <h2 class="section-title">项目流程</h2>
+            <p class="section-desc">保姆式落地辅导，确保变革真正落地</p>
+        </div>
+        <div class="about-grid">
+            <div class="about-card">
+                <img src="{{ url_for('static', filename='images/icon_process1.jpeg') }}" alt="免费调研" class="process-icon">
+                <h3>免费调研</h3>
+                <p>深入企业现场，全面了解企业现状、瓶颈与痛点，横向分工、纵向分解，精准诊断问题根源。</p>
+            </div>
+            <div class="about-card">
+                <img src="{{ url_for('static', filename='images/icon_process2.jpeg') }}" alt="方案书" class="process-icon">
+                <h3>出整改方案书</h3>
+                <p>根据调研结果出具个性化整改方案，明确实施路径、时间节点和预期效果，确保方案切实可行。</p>
+            </div>
+            <div class="about-card">
+                <img src="{{ url_for('static', filename='images/icon_process3.jpeg') }}" alt="变革落地" class="process-icon">
+                <h3>变革落地</h3>
+                <p>驻厂辅导，手把手推动方案执行，从流程梳理到团队培训，确保每一项措施真正落地执行。</p>
+            </div>
+            <div class="about-card">
+                <img src="{{ url_for('static', filename='images/icon_process4.jpeg') }}" alt="持续改进" class="process-icon">
+                <h3>持续改进</h3>
+                <p>项目结束后定期回访，建立长效机制，防止反弹，确保变革成果持续巩固。</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- 合作实景穿插 -->
+<section class="section section-alt">
+    <div class="container">
+        <div class="section-header">
+            <div class="section-tag">Collaboration</div>
+            <h2 class="section-title">合作实景</h2>
+            <p class="section-desc">深入企业一线，手把手驻厂辅导</p>
+        </div>
+        <div class="photo-gallery">
+            <div class="photo-card">
+                <img src="{{ url_for('static', filename='images/2962cd31beeac03fba405539540b6247.jpg') }}" alt="企业合作" loading="lazy">
+            </div>
+            <div class="photo-card">
+                <img src="{{ url_for('static', filename='images/a2b55e7a5a3ac799c12a7c010e5be340.jpg') }}" alt="企业合作" loading="lazy">
+            </div>
+            <div class="photo-card">
+                <img src="{{ url_for('static', filename='images/5dbfbc5bd3e9d5125e098066712b9769.jpg') }}" alt="企业合作" loading="lazy">
+            </div>
+        </div>
+        <div style="text-align:center; margin-top:24px;">
+            <a href="/gallery/collaboration" class="btn btn-outline">查看更多合作实景 →</a>
+        </div>
+    </div>
+</section>
+
+<!-- 服务优势 -->
+<section class="section">
+    <div class="container">
+        <div class="section-header">
+            <div class="section-tag">Advantages</div>
+            <h2 class="section-title">为什么选择垚博</h2>
+            <p class="section-desc">六大核心优势，让企业管理咨询真正落地生根</p>
+        </div>
+        <div class="about-grid">
+            <div class="about-card">
+                <h3>整合</h3>
+                <p>资源整合，涉及项目咨询的相关落地、培训及体系认证的量规仪器、环评、特种设备，我们都可以一站式解决。</p>
+            </div>
+            <div class="about-card">
+                <h3>培养</h3>
+                <p>每一个垚博人，不以盈利为唯一目的。先签项目用服务征服企业，再为品牌建设培养接班人，确保服务的延续性。</p>
+            </div>
+            <div class="about-card">
+                <h3>接地气</h3>
+                <p>每一个垚博人都擅长各自领域的专业培训，授课通俗易懂，有大量成功案例。我们是制造型企业的变革实干家，不是讲成功学。</p>
+            </div>
+            <div class="about-card">
+                <h3>创新</h3>
+                <p>我们都是从职场一线走过来的咨询师，深知中小微企业的瓶颈，能够一对一进行个性化定制创新方案。</p>
+            </div>
+            <div class="about-card">
+                <h3>品质</h3>
+                <p>从心出发，用心做事。每一位垚博咨询师都是实干家，每做一家企业管理变革就要做成功一家，毫无保留地服务企业、成就企业。</p>
+            </div>
+            <div class="about-card">
+                <h3>执行力</h3>
+                <p>我们的咨询师都有业绩考核，因此具备较强的执行力。客户的大小事都是我们的大事，至今保持零投诉记录。</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- 竞争优势对比 -->
+<section class="section">
+    <div class="container">
+        <div class="section-header">
+            <div class="section-tag">Comparison</div>
+            <h2 class="section-title">行业现状与我们的不同</h2>
+            <p class="section-desc">不走寻常路，做真正落地的企业管理咨询</p>
+        </div>
+        <div class="about-grid">
+            <div class="about-card">
+                <h3>行业痛点：做法单一</h3>
+                <p>没有合理的整合资源，导致价值不能产生最大化。</p>
+            </div>
+            <div class="about-card">
+                <h3>行业痛点：单价高</h3>
+                <p>大部分咨询项目单价高，中小微企业难以承受。</p>
+            </div>
+            <div class="about-card">
+                <h3>行业痛点：匹配难</h3>
+                <p>大部分中小微企业，找不到匹配自己的管理变革方法。</p>
+            </div>
+            <div class="about-card">
+                <h3>行业痛点：反弹失控</h3>
+                <p>因顾问公司变革后未能将事项进行交接及定期回访导致反弹。</p>
+            </div>
+            <div class="about-card" style="border: 2px solid var(--accent-gold);">
+                <h3>垚博：不以盈利为目的</h3>
+                <p>我们秉承从心出发去做事，用服务去征服企业方，为了品牌建设，把所做项目留给接班人。</p>
+            </div>
+            <div class="about-card" style="border: 2px solid var(--accent-gold);">
+                <h3>垚博：一对一定制</h3>
+                <p>从职场一线走过来的咨询师，深知中小微企业瓶颈，一对一进行个性化定制创新。</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}

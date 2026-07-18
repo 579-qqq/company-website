@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}培训实景 - 垚博企管{% endblock %}
+
+{% block content %}
+<section class="page-hero">
+    <div class="container page-hero-content">
+        <h1>培训实景</h1>
+        <p>实战课堂，干货满满，每一场培训都是企业成长的见证</p>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container">
+        <div class="photo-gallery">
+            <div class="photo-card">
+                <img src="{{ url_for('static', filename='images/11068d121133df31d8ea47c567a2fb7c.jpg') }}" alt="培训实景" loading="lazy">
+                <div class="photo-card-icon">+</div>
+            </div>
+            <div class="photo-card">
+                <img src="{{ url_for('static', filename='images/7349244e739829dc9ecc1bf5bdb33218.jpg') }}" alt="培训实景" loading="lazy">
+                <div class="photo-card-icon">+</div>
+            </div>
+            <div class="photo-card">
+                <img src="{{ url_for('static', filename='images/b0ea356188fd73a6c6cca9f30a23d478.jpg') }}" alt="培训实景" loading="lazy">
+                <div class="photo-card-icon">+</div>
+            </div>
+            <div class="photo-card">
+                <img src="{{ url_for('static', filename='images/10706c011d7cda2753e2cd461634c17d.jpg') }}" alt="培训实景" loading="lazy">
+                <div class="photo-card-icon">+</div>
+            </div>
+            <div class="photo-card">
+                <img src="{{ url_for('static', filename='images/988ed6612faf204bc69f7feccd977b32.jpg') }}" alt="培训实景" loading="lazy">
+                <div class="photo-card-icon">+</div>
+            </div>
+            <div class="photo-card">
+                <img src="{{ url_for('static', filename='images/f6d722a7ff211553b1709c975b9d74d2.jpg') }}" alt="培训实景" loading="lazy">
+                <div class="photo-card-icon">+</div>
+            </div>
+        </div>
+        <div style="text-align:center; margin-top: 40px;">
+            <a href="/training" class="btn btn-outline">← 返回培训课程</a>
+        </div>
+    </div>
+</section>
+{% endblock %}

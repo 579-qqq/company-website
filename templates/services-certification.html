@@ -1,0 +1,171 @@
+{% extends "base.html" %}
+{% block title %}体系认证 - 垚博企管{% endblock %}
+
+{% block content %}
+<section class="page-hero">
+    <div class="container page-hero-content">
+        <p class="page-hero-breadcrumb"><a href="/">首页</a> · <a href="/services">核心业务</a> · 体系认证</p>
+        <h1>体系认证</h1>
+        <p>专业辅导，快速拿证，为企业打通市场准入通道</p>
+    </div>
+</section>
+
+<!-- 服务概述 -->
+<section class="section">
+    <div class="container">
+        <div class="section-header">
+            <div class="section-tag">Overview</div>
+            <h2 class="section-title">服务概述</h2>
+        </div>
+        <div class="content-block">
+            <p>垚博企管拥有经验丰富的体系认证辅导团队，熟悉各大认证机构的审核标准与流程。我们不是简单帮企业"应付审核"，而是帮助企业<strong>真正建立可运行的管理体系</strong>，让体系成为企业持续改善的工具，而非一纸证书。</p>
+        </div>
+    </div>
+</section>
+
+<!-- 认证体系列表 -->
+<section class="section section-alt">
+    <div class="container">
+        <div class="section-header">
+            <div class="section-tag">Certifications</div>
+            <h2 class="section-title">辅导认证体系</h2>
+            <p class="section-desc">覆盖主流国际标准，满足不同行业需求</p>
+        </div>
+
+        {% set certs = [
+            {
+                'name': 'ISO9001',
+                'full': '质量管理体系',
+                'desc': '全球应用最广泛的管理体系标准，适用于所有行业和规模的组织，是企业规范化管理的基础框架。',
+                'scope': '全行业通用',
+                'cycle': '3-4个月',
+                'highlight': '企业投标必备资质'
+            },
+            {
+                'name': 'ISO14001',
+                'full': '环境管理体系',
+                'desc': '帮助企业建立环境管理框架，系统化管控环境因素，降低环境风险，实现绿色可持续发展。',
+                'scope': '全行业通用',
+                'cycle': '3-4个月',
+                'highlight': '环保合规、绿色供应链准入'
+            },
+            {
+                'name': 'ISO45001',
+                'full': '职业健康安全管理体系',
+                'desc': '替代OHSAS18001的新版标准，帮助企业系统化管理职业健康安全风险，保障员工安全，降低事故率。',
+                'scope': '全行业通用',
+                'cycle': '3-5个月',
+                'highlight': '安全生产标准化'
+            },
+            {
+                'name': 'IATF16949',
+                'full': '汽车行业质量管理体系',
+                'desc': '汽车行业专属的全球质量管理标准，ISO9001的升级版，是进入汽车供应链的硬性门槛。',
+                'scope': '汽车及零部件行业',
+                'cycle': '6个月',
+                'highlight': '汽车供应链准入必备'
+            }
+        ] %}
+
+        {% for cert in certs %}
+        <div class="cert-block" style="background: var(--bg-card); border-radius: var(--radius-md); padding: 36px; margin-bottom: 24px; box-shadow: var(--shadow-sm); border: 1px solid var(--border-light); display: flex; flex-wrap: wrap; gap: 24px; align-items: flex-start;">
+            <div style="flex: 0 0 140px; text-align: center;">
+                <div style="font-size: 28px; font-weight: 800; color: var(--accent-gold); letter-spacing: 1px;">{{ cert.name }}</div>
+                <div style="font-size: 13px; color: var(--text-light); margin-top: 4px;">{{ cert.full }}</div>
+            </div>
+            <div style="flex: 1; min-width: 240px;">
+                <p style="color: var(--text-secondary); line-height: 1.8; margin-bottom: 16px;">{{ cert.desc }}</p>
+                <div style="display: flex; flex-wrap: wrap; gap: 16px;">
+                    <span style="background: rgba(201,168,76,0.1); color: var(--accent-gold-dark); padding: 4px 12px; border-radius: 4px; font-size: 13px;">适用：{{ cert.scope }}</span>
+                    <span style="background: rgba(201,168,76,0.1); color: var(--accent-gold-dark); padding: 4px 12px; border-radius: 4px; font-size: 13px;">周期：{{ cert.cycle }}</span>
+                    <span style="background: var(--primary-dark); color: var(--accent-gold-light); padding: 4px 12px; border-radius: 4px; font-size: 13px;">{{ cert.highlight }}</span>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+
+<!-- 服务流程 -->
+<section class="section">
+    <div class="container">
+        <div class="section-header">
+            <div class="section-tag">Process</div>
+            <h2 class="section-title">辅导流程</h2>
+            <p class="section-desc">五步标准流程，高效推进认证</p>
+        </div>
+        <div class="about-grid" style="grid-template-columns: repeat(5, 1fr);">
+            <div class="about-card">
+                <div class="process-step-number">01</div>
+                <h3>现状诊断</h3>
+                <p>全面了解企业管理现状，对照标准要求找出差距，明确整改方向。</p>
+            </div>
+            <div class="about-card">
+                <div class="process-step-number">02</div>
+                <h3>体系建立</h3>
+                <p>编写体系文件，建立管理制度、流程文件和记录表单，搭建管理体系框架。</p>
+            </div>
+            <div class="about-card">
+                <div class="process-step-number">03</div>
+                <h3>运行辅导</h3>
+                <p>辅导企业按体系要求运行，培训内审员，开展内部审核和管理评审。</p>
+            </div>
+            <div class="about-card">
+                <div class="process-step-number">04</div>
+                <h3>审核应对</h3>
+                <p>模拟审核、查漏补缺，全程陪同认证审核，确保顺利通过。</p>
+            </div>
+            <div class="about-card">
+                <div class="process-step-number">05</div>
+                <h3>持续改善</h3>
+                <p>拿证不是终点，帮助企业将体系融入日常管理，持续改善、创造价值。</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- 服务优势 -->
+<section class="section section-alt">
+    <div class="container">
+        <div class="section-header">
+            <div class="section-tag">Advantages</div>
+            <h2 class="section-title">我们的优势</h2>
+        </div>
+        <div class="about-grid">
+            <div class="about-card">
+                <h3>高通过率</h3>
+                <p>十余年辅导经验，熟悉各认证机构审核风格，一次性通过率保持行业领先水平。</p>
+            </div>
+            <div class="about-card">
+                <h3>快速拿证</h3>
+                <p>标准化辅导流程，高效推进，缩短企业等待时间，最快3个月即可拿证。</p>
+            </div>
+            <div class="about-card">
+                <h3>实用导向</h3>
+                <p>不搞形式主义，体系文件贴合企业实际，真正能用、好用，而非锁在柜子里。</p>
+            </div>
+            <div class="about-card">
+                <h3>整合资源</h3>
+                <p>量规仪器校准、环评、特种设备等认证相关配套资源一站式解决，不让企业在各个环节来回折腾。</p>
+            </div>
+            <div class="about-card">
+                <h3>补贴方案</h3>
+                <p>可选认证补贴方式，帮助企业最大程度降低认证费用负担。</p>
+            </div>
+            <div class="about-card">
+                <h3>持续服务</h3>
+                <p>拿证后提供年度监督审核辅导，确保证书持续有效，不在年审时掉链子。</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA -->
+<section class="section" style="text-align: center;">
+    <div class="container">
+        <h2 style="margin-bottom: 16px;">让专业的人做专业的事</h2>
+        <p style="color: var(--text-secondary); margin-bottom: 24px;">体系认证不复杂，找对人就不走弯路</p>
+        <a href="/#contact" class="btn btn-primary">立即咨询</a>
+    </div>
+</section>
+{% endblock %}

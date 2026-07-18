@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block title %}核心团队 - 垚博企管{% endblock %}
+
+{% block content %}
+<section class="page-hero">
+    <div class="container page-hero-content">
+        <h1>核心团队</h1>
+        <p>实战型咨询团队，懂企业、能落地、重实效</p>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container">
+        <div class="about-grid">
+            <div class="about-card">
+                <img class="team-photo" src="{{ url_for('static', filename='images/photo_luocheng.jpeg') }}" alt="罗城">
+                <h3>罗城 — 总经理/创始人</h3>
+                <p>本科学历，工商管理专业，擅长企业管理变革，制造型运营各岗位的培训专家。七年多制造型企业变革咨询师工作经验，垚博企管自媒体主理人、东莞理工学院特邀讲师、八家企业常年顾问。擅长体系认证、体系辅导、验厂辅导、品质改善、精益生产、交期提升、企业文化建设等。</p>
+            </div>
+            <div class="about-card">
+                <img class="team-photo" src="{{ url_for('static', filename='images/photo_hujun.jpeg') }}" alt="胡骏">
+                <h3>胡骏 — 合伙人</h3>
+                <p>93年毕业于武汉大学经济系工商管理专业，辅导过华南印刷、德丰电子、TDK东莞工厂、理光集团、美的集团、玖龙纸业等企业，擅长精益生产、体系落地、绩效考核等管理咨询项目。</p>
+            </div>
+            <div class="about-card">
+                <img class="team-photo" src="{{ url_for('static', filename='images/photo_wangyuehong.jpeg') }}" alt="王跃红">
+                <h3>王跃红 — 合伙人</h3>
+                <p>硕士学历，八年以上品质经理工作经验，五年品质总监工作经验。尤其擅长体系、现场管理、客诉处理。四年ISO9001/TS16949/OHSAS18001等体系辅导老师及审核师工作经验，擅长品质系统的全盘管理及落地辅导、各类体系的辅导及认证、6S目视化管理。</p>
+            </div>
+            <div class="about-card">
+                <img class="team-photo" src="{{ url_for('static', filename='images/photo_zhangwencai.jpeg') }}" alt="张文财">
+                <h3>张文财 — 合伙人</h3>
+                <p>中山大学客串教授，东莞三家商学院客座教授。擅长塑胶模具行业的精益生产、交期提升、品质保证、成本管控、绩效实施等咨询项目，是一位实战家，引领前沿思想的变革咨询师。</p>
+            </div>
+            <div class="about-card">
+                <img class="team-photo" src="{{ url_for('static', filename='images/photo_huzhihui.jpeg') }}" alt="胡知辉">
+                <h3>胡知辉 — 咨询师</h3>
+                <p>技术出身，曾在富士康任职IE专理，擅长制造型企业的精益生产和降本增效，擅长培训及搭建改善攻关小组。</p>
+            </div>
+            <div class="about-card">
+                <img class="team-photo" src="{{ url_for('static', filename='images/photo_xiaojifu.jpeg') }}" alt="肖吉福">
+                <h3>肖吉福 — 咨询师</h3>
+                <p>制造型企业咨询经验九年，曾在欧博、朗欧等咨询公司担任项目组长。擅长供应链的变革，主打管理目标梳理、生产协调会、采购、仓库的变革。</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- 团队现场实景 -->
+<section class="section section-alt">
+    <div class="container">
+        <div class="section-header">
+            <div class="section-tag">Highlights</div>
+            <h2 class="section-title">团队现场实景</h2>
+            <p class="section-desc">每一个项目现场，都是垚博人用心服务的真实写照</p>
+        </div>
+        <div class="photo-gallery col-2" style="max-width:700px; margin:0 auto;">
+            <div class="photo-card square">
+                <img src="{{ url_for('static', filename='images/17f51079af6e6833c9d6cd7b9bfaca0e.jpg') }}" alt="团队风采" loading="lazy">
+                <div class="photo-card-icon">+</div>
+            </div>
+            <div class="photo-card square">
+                <img src="{{ url_for('static', filename='images/31405662481b25f8e3a9cf39006e07e0.jpg') }}" alt="团队风采" loading="lazy">
+                <div class="photo-card-icon">+</div>
+            </div>
+            <div class="photo-card square">
+                <img src="{{ url_for('static', filename='images/2fe921f8e4a390c5b8cd14276ab22fc4.jpg') }}" alt="团队风采" loading="lazy">
+                <div class="photo-card-icon">+</div>
+            </div>
+        </div>
+        <div style="text-align:center; margin-top:40px;">
+            <a href="/about" class="btn btn-outline">← 返回关于我们</a>
+        </div>
+    </div>
+</section>
+{% endblock %}

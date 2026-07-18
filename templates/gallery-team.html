@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}团队风采 - 垚博企管{% endblock %}
+
+{% block content %}
+<section class="page-hero">
+    <div class="container page-hero-content">
+        <h1>团队风采</h1>
+        <p>每一个项目现场，都是垚博人用心服务的真实写照</p>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container">
+        <div class="photo-gallery col-2" style="max-width: 700px; margin: 0 auto;">
+            <div class="photo-card square">
+                <img src="{{ url_for('static', filename='images/17f51079af6e6833c9d6cd7b9bfaca0e.jpg') }}" alt="团队风采" loading="lazy">
+                <div class="photo-card-icon">+</div>
+            </div>
+            <div class="photo-card square">
+                <img src="{{ url_for('static', filename='images/31405662481b25f8e3a9cf39006e07e0.jpg') }}" alt="团队风采" loading="lazy">
+                <div class="photo-card-icon">+</div>
+            </div>
+            <div class="photo-card square">
+                <img src="{{ url_for('static', filename='images/2fe921f8e4a390c5b8cd14276ab22fc4.jpg') }}" alt="团队风采" loading="lazy">
+                <div class="photo-card-icon">+</div>
+            </div>
+        </div>
+        <div style="text-align:center; margin-top: 40px;">
+            <a href="/about" class="btn btn-outline">← 返回关于我们</a>
+        </div>
+    </div>
+</section>
+{% endblock %}

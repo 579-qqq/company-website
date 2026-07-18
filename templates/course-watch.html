@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}{{ chapter.title }} - {{ course.title }} - 垚博企管{% endblock %}
+
+{% block content %}
+<section class="hero" style="min-height: auto; padding: 140px 0 60px;">
+    <div class="hero-glow hero-glow-1"></div>
+    <div class="container">
+        <div class="hero-content" style="text-align: center;">
+            <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 8px;">
+                <a href="/" style="color: var(--text-muted); text-decoration: none;">首页</a> · <a href="/courses" style="color: var(--text-muted); text-decoration: none;">在线课程</a> · <a href="/courses/{{ course.id }}" style="color: var(--text-muted); text-decoration: none;">{{ course.title }}</a>
+            </p>
+            <h1 style="font-size: 24px;">{{ chapter.title }}</h1>
+        </div>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container">
+        <div style="display: flex; flex-wrap: wrap; gap: 24px;">
+            <!-- 视频播放区 -->
+            <div style="flex: 1; min-width: 300px;">
+                {% if chapter.video_url %}
+                <video controls style="width: 100%; border-radius: 12px; background: #000;" controlsList="nodownload" oncontextmenu="return false;">
+                    <source src="{{ chapter.video_url }}" type="video/mp4">
+                    您的浏览器不支持视频播放
+                </video>
+                {% else %}
+                <div class="course-cover-placeholder" style="height: 400px; position: relative;">
+                    <div class="course-cover-icon" style="font-size: 64px;">🎬</div>
+                    <p style="color: var(--text-light); margin-top: 12px;">视频正在准备中，敬请期待</p>
+                </div>
+                {% endif %}
+
+                <div style="margin-top: 20px; color: var(--text-secondary); line-height: 2;">
+                    <p>{{ chapter.description or '本章节暂无简介' }}</p>
+                </div>
+            </div>
+
+            <!-- 章节导航 -->
+            <div style="flex: 0 0 320px; max-width: 100%;">
+                <div class="auth-card">
+                    <h4 style="margin-bottom: 16px;">📋 课程章节</h4>
+                    <div class="chapter-list">
+                        {% for ch in chapters %}
+                        <a href="/courses/{{ course.id }}/watch/{{ ch.id }}"
+                           class="chapter-item {% if ch.id == chapter.id %}chapter-active{% endif %} {% if ch.is_free %}chapter-free{% endif %}">
+                            <span class="chapter-num">{{ ch.sort_order }}</span>
+                            <span class="chapter-title">{{ ch.title }}</span>
+                            <span class="chapter-duration">{{ (ch.duration // 60)|string ~ ':' ~ '%02d'|format(ch.duration % 60) }}</span>
+                        </a>
+                        {% endfor %}
+                    </div>
+                    <a href="/courses/{{ course.id }}" class="btn btn-outline" style="width: 100%; margin-top: 16px; display: block; text-align: center;">← 返回课程详情</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

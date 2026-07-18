@@ -1,0 +1,75 @@
+﻿{% extends "base.html" %}
+{% block title %}培训课程 - 垚博企管{% endblock %}
+
+{% block content %}
+<section class="page-hero">
+    <div class="container page-hero-content">
+        <h1>培训课程体系</h1>
+        <p>可依企业需求定制对应课程，实战干货，一年陪跑</p>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container">
+        <div class="about-grid">
+            <div class="about-card">
+                <h3>运营管理类</h3>
+                <p>运营管理知识、战略规划、团队打造、流程再造、PMC部门建设、交期提升、绩效管理、ISO9001体系、文件编写、供应商审核</p>
+            </div>
+            <div class="about-card">
+                <h3>生产管理类</h3>
+                <p>流程培训、走进PMC、生产计划与物料控制、敏捷式生产、库存控制、物料控制与采购协调、采购管理、仓库管理、PMC管理、生产异常管理</p>
+            </div>
+            <div class="about-card">
+                <h3>品质管理类</h3>
+                <p>质量意识、4M1E、QC七大手法、塑胶品质、IATF16949系统、六大工具、DQE项目工程师、SQE供应商质量工程师、PQE制程质量工程师、CQE客诉质量工程师</p>
+            </div>
+            <div class="about-card">
+                <h3>精益现场类</h3>
+                <p>6S与稽核、4M1E、PDCA、IE七大手法、质量意识、现场管理、生产品质、生产设备、生产成本、生产异常</p>
+            </div>
+            <div class="about-card">
+                <h3>体系认证类</h3>
+                <p>ISO9001、ISO14001、ISO45001、内审组织、外审应对、客户审核应对、客户自查表、供应商审核、管理评审、入司工作开展报告</p>
+            </div>
+            <div class="about-card">
+                <h3>专项进阶类</h3>
+                <p>制造业流程、文件编写、SA8000社会责任、6S和稽核、IATF16949内审员、六大工具总述、VDA6.3过程审核、VDA6.5产品审核、质量方针和目标、质量原则及常见表单</p>
+            </div>
+        </div>
+        <div style="max-width: 720px; margin: 32px auto 0; padding: 24px 28px; background: rgba(201,168,76,0.06); border-radius: 14px; border: 1px solid rgba(201,168,76,0.15); text-align: center;">
+            <p style="color: var(--accent-gold-dark); font-weight: 700; margin-bottom: 8px;">▎培训优势</p>
+            <p style="font-size: 14px; color: var(--text-secondary); line-height: 2;">
+                ① 培训内容为体系认证时的实操经验，干货满满<br>
+                ② 培训后提供对应资料，并免费提供<strong>一年陪跑</strong>服务<br>
+                ③ 参训员工一年内可不限次数<strong>免费复训</strong>及观看回放
+            </p>
+        </div>
+    </div>
+</section>
+
+<!-- 培训实景 -->
+<section class="section section-alt">
+    <div class="container">
+        <div class="section-header">
+            <div class="section-tag">Moments</div>
+            <h2 class="section-title">培训实景</h2>
+            <p class="section-desc">实战课堂，干货满满</p>
+        </div>
+        <div class="photo-gallery">
+            <div class="photo-card">
+                <img src="{{ url_for('static', filename='images/11068d121133df31d8ea47c567a2fb7c.jpg') }}" alt="培训实景" loading="lazy">
+            </div>
+            <div class="photo-card">
+                <img src="{{ url_for('static', filename='images/7349244e739829dc9ecc1bf5bdb33218.jpg') }}" alt="培训实景" loading="lazy">
+            </div>
+            <div class="photo-card">
+                <img src="{{ url_for('static', filename='images/b0ea356188fd73a6c6cca9f30a23d478.jpg') }}" alt="培训实景" loading="lazy">
+            </div>
+        </div>
+        <div style="text-align:center; margin-top:24px;">
+            <a href="/gallery/training" class="btn btn-outline">查看全部培训实景 →</a>
+        </div>
+    </div>
+</section>
+{% endblock %}

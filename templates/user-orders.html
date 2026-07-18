@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}我的订单 - 垚博企管{% endblock %}
+
+{% block content %}
+<section class="hero" style="min-height: auto; padding: 160px 0 80px;">
+    <div class="hero-glow hero-glow-1"></div>
+    <div class="container">
+        <div class="hero-content" style="text-align: center;">
+            <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 8px;"><a href="/" style="color: var(--text-muted); text-decoration: none;">首页</a></p>
+            <h1>我的订单</h1>
+        </div>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container" style="max-width: 800px; margin: 0 auto;">
+        {% if orders|length == 0 %}
+        <div style="text-align: center; padding: 60px 0; color: var(--text-secondary);">
+            <p style="font-size: 18px;">暂无订单</p>
+            <p style="margin-top: 12px;"><a href="/courses" style="color: var(--accent-gold);">去选课 →</a></p>
+        </div>
+        {% else %}
+        <div style="display: flex; flex-direction: column; gap: 16px;">
+            {% for order in orders %}
+            <div class="order-card">
+                <div class="order-header">
+                    <span class="order-course-title">{{ order.course_title }}</span>
+                    <span class="order-badge order-badge-{{ order.status }}">{% if order.status == 'paid' %}已支付{% elif order.status == 'pending' %}待支付{% elif order.status == 'cancelled' %}已取消{% else %}{{ order.status }}{% endif %}</span>
+                </div>
+                <div class="order-info">
+                    <span>订单号：{{ order.order_no }}</span>
+                    <span>金额：¥{{ "%.2f"|format(order.amount / 100) }}</span>
+                    <span>时间：{{ order.created_at[:10] }}</span>
+                </div>
+                <div class="order-actions">
+                    {% if order.status == 'paid' %}
+                    <a href="/courses/{{ order.course_id }}" class="btn btn-outline" style="font-size: 13px; padding: 6px 16px;">进入课程 →</a>
+                    {% elif order.status == 'pending' %}
+                    <a href="/courses/{{ order.course_id }}" class="btn btn-primary" style="font-size: 13px; padding: 6px 16px;">去支付</a>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

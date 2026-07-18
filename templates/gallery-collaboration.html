@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}合作实景 - 垚博企管{% endblock %}
+
+{% block content %}
+<section class="page-hero">
+    <div class="container page-hero-content">
+        <h1>合作实景</h1>
+        <p>深入企业一线，手把手驻厂辅导，与企业共同成长</p>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container">
+        <div class="photo-gallery">
+            <div class="photo-card">
+                <img src="{{ url_for('static', filename='images/2962cd31beeac03fba405539540b6247.jpg') }}" alt="企业合作" loading="lazy">
+                <div class="photo-card-icon">+</div>
+            </div>
+            <div class="photo-card">
+                <img src="{{ url_for('static', filename='images/a2b55e7a5a3ac799c12a7c010e5be340.jpg') }}" alt="企业合作" loading="lazy">
+                <div class="photo-card-icon">+</div>
+            </div>
+            <div class="photo-card">
+                <img src="{{ url_for('static', filename='images/5dbfbc5bd3e9d5125e098066712b9769.jpg') }}" alt="企业合作" loading="lazy">
+                <div class="photo-card-icon">+</div>
+            </div>
+            <div class="photo-card">
+                <img src="{{ url_for('static', filename='images/ee7b3216c13e4e1a3646a63d70fec461.jpg') }}" alt="企业合作" loading="lazy">
+                <div class="photo-card-icon">+</div>
+            </div>
+            <div class="photo-card">
+                <img src="{{ url_for('static', filename='images/81cc1e601d38c2daebc59640847389f3.jpg') }}" alt="企业合作" loading="lazy">
+                <div class="photo-card-icon">+</div>
+            </div>
+        </div>
+        <div style="text-align:center; margin-top: 40px;">
+            <a href="/services" class="btn btn-outline">← 返回核心业务</a>
+        </div>
+    </div>
+</section>
+{% endblock %}
