@@ -124,12 +124,19 @@ function renderQuestions() {
     const container = document.getElementById('questionList');
     let html = '';
     questions.forEach((q, idx) => {
-        const categoryCls = q.category === '基础知识' ? 'tag-basic' : 'tag-professional';
+        let categoryCls = 'tag-default';
+        const cat = q.category || '';
+        if (cat.includes('基础知识') || cat.includes('基础')) categoryCls = 'tag-basic';
+        else if (cat.includes('专业')) categoryCls = 'tag-professional';
+        else if (cat.includes('ISO')) categoryCls = 'tag-iso';
+        // 缩短分类显示名
+        let catDisplay = cat;
+        if (cat === 'ISO9001质量管理体系') catDisplay = 'ISO9001';
         html += `
             <div class="question-card" id="q-${q.id}">
                 <div class="question-header">
                     <span class="question-number">${idx + 1}</span>
-                    <span class="question-tag ${categoryCls}">${q.category}</span>
+                    <span class="question-tag ${categoryCls}">${catDisplay}</span>
                     <span class="question-score">${q.score} 分</span>
                 </div>
                 <div class="question-content">${q.content}</div>

@@ -211,18 +211,19 @@ body {
 .nav-menu {
     list-style: none;
     display: flex;
-    gap: 2px;
+    gap: 0;
+    white-space: nowrap;
 }
 
 .nav-link {
     color: var(--text-muted);
     text-decoration: none;
-    padding: 10px 22px;
+    padding: 10px 13px;
     border-radius: var(--radius-sm);
     transition: all var(--transition);
-    font-size: 14px;
+    font-size: 13.5px;
     font-weight: 500;
-    letter-spacing: 0.3px;
+    letter-spacing: 0.2px;
     position: relative;
 }
 
@@ -1289,6 +1290,16 @@ a.service-link-card:hover .card-link-text {
 .tag-professional {
     background: rgba(201,168,76,0.1);
     color: var(--accent-gold-dark);
+}
+
+.tag-iso {
+    background: rgba(39,174,96,0.1);
+    color: #27ae60;
+}
+
+.tag-default {
+    background: rgba(149,165,166,0.1);
+    color: #7f8c8d;
 }
 
 .question-score {

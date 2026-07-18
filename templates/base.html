@@ -35,13 +35,7 @@
                 <li><a href="/certificate" class="nav-link nav-cta {% if request.path == '/certificate' %}active{% endif %}">证书查询</a></li>
                 <li><a href="/exam" class="nav-link nav-cta {% if request.path == '/exam' %}active{% endif %}">在线考试</a></li>
                 {% if user %}
-                <li class="nav-dropdown">
-                    <a href="/user/orders" class="nav-link {% if request.path == '/user/orders' %}active{% endif %}">👤 {{ user.username }} <span class="nav-arrow">▾</span></a>
-                    <ul class="nav-submenu">
-                        <li><a href="/user/orders">我的订单</a></li>
-                        <li><a href="/auth/logout">退出登录</a></li>
-                    </ul>
-                </li>
+                <li><a href="/user/orders" class="nav-link {% if request.path == '/user/orders' %}active{% endif %}">个人中心</a></li>
                 {% else %}
                 <li><a href="/auth/login" class="nav-link {% if request.path == '/auth/login' %}active{% endif %}">登录</a></li>
                 {% endif %}
